@@ -11,7 +11,7 @@ function DepartmentManagement() {
   const fetchDepartments = async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      const res = await axios.get('http://localhost:8000/api/departments/', {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/departments/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setDepartments(res.data);
@@ -35,10 +35,10 @@ function DepartmentManagement() {
 
     try {
       if (isEditing) {
-        await axios.put(`http://localhost:8000/api/departments/${editingId}/`, formData, config);
+        await axios.put(`${process.env.REACT_APP_API_URL}/api/departments/${editingId}/`, formData, config);
         setMessage('Department updated');
       } else {
-        await axios.post('http://localhost:8000/api/departments/', formData, config);
+        await axios.post(`${process.env.REACT_APP_API_URL}/api/departments/`, formData, config);
         setMessage('Department created');
       }
 
@@ -62,7 +62,7 @@ function DepartmentManagement() {
     if (!window.confirm('Delete this department?')) return;
     const token = localStorage.getItem('accessToken');
     try {
-      await axios.delete(`http://localhost:8000/api/departments/${id}/`, {
+      await axios.delete(`${process.env.REACT_APP_API_URL}/api/departments/${id}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchDepartments();

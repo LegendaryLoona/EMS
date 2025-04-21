@@ -34,8 +34,8 @@ function UserManagement({ user }) {
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
       const [usersRes, deptsRes] = await Promise.all([
-        axios.get('http://localhost:8000/api/users/', config),
-        axios.get('http://localhost:8000/api/departments/', config),
+        axios.get(`${process.env.REACT_APP_API_URL}/api/users/`, config),
+        axios.get(`${process.env.REACT_APP_API_URL}/api/departments/`, config),
       ]);
 
       setUsers(usersRes.data);
@@ -66,10 +66,10 @@ function UserManagement({ user }) {
         if (!payload.password) {
           delete payload.password;
         }
-        await axios.put(`http://localhost:8000/api/users/${editingUserId}/`, payload, config);
+        await axios.put(`${process.env.REACT_APP_API_URL}/api/users/${editingUserId}/`, payload, config);
         setMessage('User updated successfully');
       } else {
-        await axios.post('http://localhost:8000/api/users/', payload, config);
+        await axios.post(`${process.env.REACT_APP_API_URL}/api/users/`, payload, config);
         setMessage('User created successfully');
       }
 
@@ -102,7 +102,7 @@ function UserManagement({ user }) {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
       const token = localStorage.getItem('accessToken');
-      await axios.delete(`http://localhost:8000/api/users/${userId}/`, {
+      await axios.delete(`${process.env.REACT_APP_API_URL}/api/users/${userId}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setMessage('User deleted successfully');

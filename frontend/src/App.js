@@ -1,4 +1,3 @@
-// App.js with added console logs
 import React, { useState, useEffect } from 'react';
 import Login from './components/Login';
 import AdminDashboard from './components/AdminDashboard';

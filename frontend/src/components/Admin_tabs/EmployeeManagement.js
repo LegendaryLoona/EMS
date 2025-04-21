@@ -36,8 +36,8 @@ function EmployeeManagementTab() {
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
       const [empRes, usersRes] = await Promise.all([
-        axios.get('http://localhost:8000/api/employees/', config),
-        axios.get('http://localhost:8000/api/users/', config)
+        axios.get(`${process.env.REACT_APP_API_URL}/api/employees/`, config),
+        axios.get(`${process.env.REACT_APP_API_URL}/api/users/`, config)
       ]);
 
       setEmployees(empRes.data);
@@ -87,9 +87,9 @@ function EmployeeManagementTab() {
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
       if (editingEmployee) {
-        await axios.put(`http://localhost:8000/api/employees/${editingEmployee}/`, formData, config);
+        await axios.put(`${process.env.REACT_APP_API_URL}/api/employees/${editingEmployee}/`, formData, config);
       } else {
-        await axios.post('http://localhost:8000/api/employees/', formData, config);
+        await axios.post(`${process.env.REACT_APP_API_URL}/api/employees/`, formData, config);
       }
 
       fetchData();
