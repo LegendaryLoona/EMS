@@ -7,7 +7,12 @@ from django.contrib.auth import authenticate
 from .models import CustomUser, Department, Employee
 from .serializers import CustomUserSerializer
 from .serializers import DepartmentSerializer, CustomUserSerializer, EmployeeSerializer
+from django.http import HttpResponse
+from django.core.management import call_command
 
+def create_admin_user(request):
+    call_command('create_superuser')
+    return HttpResponse("Admin user created successfully!")
 
 
 class LoginView(APIView):
