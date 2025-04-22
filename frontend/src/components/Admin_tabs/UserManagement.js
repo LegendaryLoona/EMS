@@ -4,7 +4,6 @@ import axios from 'axios';
 
 function UserManagement({ user }) {
   const [users, setUsers] = useState([]);
-  const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -18,7 +17,6 @@ function UserManagement({ user }) {
     first_name: '',
     last_name: '',
     role: 'employee',
-    department: null,
   };
 
   const [userForm, setUserForm] = useState(initialUserFormState);
@@ -35,11 +33,9 @@ function UserManagement({ user }) {
 
       const [usersRes, deptsRes] = await Promise.all([
         axios.get(`${process.env.REACT_APP_API_URL}/api/users/`, config),
-        axios.get(`${process.env.REACT_APP_API_URL}/api/departments/`, config),
       ]);
 
       setUsers(usersRes.data);
-      setDepartments(deptsRes.data);
     } catch (err) {
       console.error('Fetch error:', err);
       setError('Failed to load data');
@@ -91,7 +87,6 @@ function UserManagement({ user }) {
         first_name: userToEdit.first_name,
         last_name: userToEdit.last_name,
         role: userToEdit.role,
-        department: userToEdit.department,
       });
       setIsEditing(true);
       setEditingUserId(userId);
@@ -182,18 +177,6 @@ function UserManagement({ user }) {
                 <option value="employee">Employee</option>
               </select>
             </div>
-
-            <div className="form-group">
-              <label>Department:</label>
-              <select name="department" value={userForm.department || ''} onChange={handleInputChange}>
-                <option value="">Select Department</option>
-                {departments.map((dept) => (
-                  <option key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </option>
-                ))}
-              </select>
-            </div>
           </div>
 
           <div className="form-actions">
@@ -216,7 +199,6 @@ function UserManagement({ user }) {
               <th>Name</th>
               <th>Email</th>
               <th>Role</th>
-              <th>Department</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -227,7 +209,6 @@ function UserManagement({ user }) {
                 <td>{u.first_name} {u.last_name}</td>
                 <td>{u.email}</td>
                 <td>{u.role}</td>
-                <td>{u.department ? departments.find((d) => d.id === u.department)?.name : 'None'}</td>
                 <td className="user-actions">
                   <button onClick={() => handleEdit(u.id)} className="edit-button">Edit</button>
                   <button onClick={() => handleDelete(u.id)} className="delete-button">Delete</button>

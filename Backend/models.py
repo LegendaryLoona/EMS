@@ -24,8 +24,6 @@ class CustomUser(AbstractUser):
     )
     
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='employee')
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
     
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"
@@ -50,6 +48,7 @@ class Employee(models.Model):
     manager = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='team_members')
     position = models.CharField(max_length=100)
     salary = models.DecimalField(max_digits=10, decimal_places=2)
+    department = models.ForeignKey('Department', on_delete=models.SET_NULL, null=True, blank=True, related_name='employees')
     is_active = models.BooleanField(default=True)
     
     def __str__(self):

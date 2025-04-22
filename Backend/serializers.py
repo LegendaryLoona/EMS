@@ -12,10 +12,10 @@ class DepartmentSerializer(serializers.ModelSerializer):
         model = Department
         fields = '__all__'
     def get_employee_count(self, obj):
-        return Employee.objects.filter(user__department=obj).count()
+        return Employee.objects.filter(department=obj).count()
 
     def get_total_salary(self, obj):
-        total = Employee.objects.filter(user__department=obj).aggregate(total=Sum('salary'))['total']
+        total = Employee.objects.filter(department=obj).aggregate(total=Sum('salary'))['total']
         return total or 0.00
 
 
@@ -29,7 +29,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = [
             'id', 'username', 'email', 'password',
-            'first_name', 'last_name', 'role', 'department'
+            'first_name', 'last_name', 'role',
         ]
 
     def create(self, validated_data):
@@ -59,7 +59,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 
 class EmployeeSerializer(serializers.ModelSerializer):
-    department_name = serializers.ReadOnlyField(source='user.department.name', read_only=True)
+    department_name = serializers.ReadOnlyField(source='department.name')
     manager_name = serializers.ReadOnlyField(source='manager.first_name', read_only=True)
     
     class Meta:

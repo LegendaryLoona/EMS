@@ -8,6 +8,8 @@ function EmployeeManagementTab() {
   const [filterText, setFilterText] = useState('');
   const [users, setUsers] = useState([]);
   const [formData, setFormData] = useState(initialForm());
+  const [departments, setDepartments] = useState([]);
+
 
   function initialForm() {
     return {
@@ -23,6 +25,7 @@ function EmployeeManagementTab() {
       is_active: true,
       manager: '',
       user: '',
+      department: '',
     };
   }
 
@@ -37,12 +40,14 @@ function EmployeeManagementTab() {
 
       const [empRes, usersRes] = await Promise.all([
         axios.get(`${process.env.REACT_APP_API_URL}/api/employees/`, config),
-        axios.get(`${process.env.REACT_APP_API_URL}/api/users/`, config)
+        axios.get(`${process.env.REACT_APP_API_URL}/api/users/`, config),
+        axios.get(`${process.env.REACT_APP_API_URL}/api/departments/`, config),
       ]);
 
       setEmployees(empRes.data);
       setFiltered(empRes.data);
       setUsers(usersRes.data);
+      setDepartments(deptsRes.data);
     } catch (err) {
       console.error("Failed to fetch data", err);
     }
@@ -72,6 +77,7 @@ function EmployeeManagementTab() {
       ...emp,
       manager: emp.manager || '',
       user: emp.user || '',
+      department: emp.department || '',
     });
   };
 
@@ -174,6 +180,18 @@ function EmployeeManagementTab() {
               {employees.map(emp => (
                 <option key={emp.id} value={emp.id}>
                   {emp.first_name} {emp.last_name}
+                </option>
+              ))}
+            </select>
+          </label>
+          
+          <label>
+            Department:
+            <select name="department" value={formData.department || ''} onChange={handleChange}>
+              <option value="">Select Department</option>
+              {departments.map((dept) => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.name}
                 </option>
               ))}
             </select>
