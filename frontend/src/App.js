@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Login from './components/Login';
 import AdminDashboard from './components/AdminDashboard';
 import EmployeeDashboard from './components/EmployeeDashboard';
+import ManagerDashboard from './components/ManagerDashboard';
 import './App.css';
 
 function App() {
@@ -67,6 +68,11 @@ function App() {
           <>
             <div style={{color: 'red'}}>Role is: {user.role}</div>
             <AdminDashboard user={user} />
+          </>
+        ) : user.role === 'manager' ? (
+          <>
+            <div style={{color: 'red'}}>Role is: {user.role}</div>
+            <ManagerDashboard user={user} />
           </>
         ) : (
           <>
