@@ -38,7 +38,7 @@ function EmployeeManagementTab() {
       const token = localStorage.getItem('accessToken');
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      const [empRes, usersRes] = await Promise.all([
+      const [empRes, usersRes, deptsRes] = await Promise.all([
         axios.get(`${process.env.REACT_APP_API_URL}/api/employees/`, config),
         axios.get(`${process.env.REACT_APP_API_URL}/api/users/`, config),
         axios.get(`${process.env.REACT_APP_API_URL}/api/departments/`, config),
