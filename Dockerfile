@@ -5,7 +5,8 @@ WORKDIR /app
 # Install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-
+RUN python manage.py migrate
+RUN python manage.py setup_initial_data
 # Copy project
 COPY . .
 
