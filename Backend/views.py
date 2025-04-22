@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from django.core.management import call_command
 
 def create_admin_user(request):
+    print('trying to create a superuser')
     call_command('create_superuser')
     return HttpResponse("Admin user created successfully!")
 
