@@ -5,8 +5,17 @@ User = get_user_model()
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        if not User.objects.filter(username='admin').exists():
-            User.objects.create_superuser('admin', 'admin@example.com', 'admin')
-            self.stdout.write(self.style.SUCCESS('Superuser created!'))
-        else:
-            self.stdout.write(self.style.SUCCESS('Superuser already exists.'))
+        # Delete existing admin user if it exists
+        if User.objects.filter(username='admin').exists():
+            User.objects.filter(username='admin').delete()
+            self.stdout.write(self.style.SUCCESS('Existing admin user deleted.'))
+        
+        # Create superuser
+        admin = User.objects.create_superuser('admin', 'admin@example.com', 'your_secure_password')
+        
+        # Set role to 'admin' if your User model has this field
+        if hasattr(admin, 'role'):
+            admin.role = 'admin'
+            admin.save()
+            
+        self.stdout.write(self.style.SUCCESS('Superuser created with role="admin"!'))
