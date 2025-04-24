@@ -4,13 +4,44 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
-from .models import CustomUser, Department, Employee
-from .serializers import CustomUserSerializer
-from .serializers import DepartmentSerializer, CustomUserSerializer, EmployeeSerializer
+from .models import CustomUser, Department, Employee, Attendance
+from .serializers import DepartmentSerializer, CustomUserSerializer, EmployeeSerializer, AttendanceSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 
 
+
+
+class IsManager(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == 'manager'
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated, IsManager])
+def get_department_attendance(request):
+    try:
+        manager_employee = Employee.objects.get(user=request.user)
+        department = manager_employee.department
+        employees = Employee.objects.filter(department=department)
+        attendances = Attendance.objects.filter(employee__in=employees).select_related('employee')
+        serializer = AttendanceSerializer(attendances, many=True)
+        return Response(serializer.data)
+    except Employee.DoesNotExist:
+        return Response({"error": "Manager profile not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated, IsManager])
+def mark_attendance(request):
+    """
+    Manager provides: employee ID, date, clock_in, and clock_out times
+    """
+    serializer = AttendanceSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
