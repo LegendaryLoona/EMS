@@ -7,6 +7,17 @@ from django.contrib.auth import authenticate
 from .models import CustomUser, Department, Employee
 from .serializers import CustomUserSerializer
 from .serializers import DepartmentSerializer, CustomUserSerializer, EmployeeSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def my_profile(request):
+    employee = Employee.objects.select_related('department').get(user=request.user)
+    serializer = EmployeeSerializer(employee)
+    return Response(serializer.data)
 
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -31,6 +42,25 @@ class LoginView(APIView):
             })
         
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def department_employees(request, department_id):
+    employees = Employee.objects.filter(department__id=department_id).select_related('user')
+    data = []
+    for emp in employees:
+        data.append({
+            'id': emp.id,
+            'first_name': emp.first_name,
+            'last_name': emp.last_name,
+            'position': emp.position,
+            'salary': emp.salary,
+            'user_email': emp.user.email,
+        })
+    return Response(data)
+
 
 
 class UserViewSet(viewsets.ModelViewSet):
