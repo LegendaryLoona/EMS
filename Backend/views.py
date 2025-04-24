@@ -11,14 +11,8 @@ from rest_framework.decorators import api_view, permission_classes
 
 
 
-
-class IsManager(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role == 'manager'
-
-
 @api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated, IsManager])
+@permission_classes([permissions.IsAuthenticated])
 def get_department_attendance(request):
     try:
         manager_employee = Employee.objects.get(user=request.user)
@@ -32,7 +26,7 @@ def get_department_attendance(request):
 
 
 @api_view(['POST'])
-@permission_classes([permissions.IsAuthenticated, IsManager])
+@permission_classes([permissions.IsAuthenticated])
 def mark_attendance(request):
     """
     Manager provides: employee ID, date, clock_in, and clock_out times
