@@ -11,12 +11,12 @@ function ManagerDashboard({ user }) {
 
   useEffect(() => {
     // Fetch manager's employee profile
-    axios.get('http://localhost:8000/api/my-profile/', config)
+    axios.get(`${process.env.REACT_APP_API_URL}/api/my-profile/`, config)
       .then(res => {
         setEmployeeProfile(res.data);
         if (res.data.department) {
           // Then fetch employees in the same department
-          axios.get(`http://localhost:8000/api/departments/${res.data.department}/employees/`, config)
+          axios.get(`${process.env.REACT_APP_API_URL}/api/departments/${res.data.department}/employees/`, config)
             .then(empRes => setDepartmentEmployees(empRes.data))
             .catch(err => console.error('Error fetching department employees:', err));
         }

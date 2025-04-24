@@ -13,6 +13,7 @@ from rest_framework.decorators import api_view, permission_classes
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def my_profile(request):
     employee = Employee.objects.select_related('department').get(user=request.user)
     serializer = EmployeeSerializer(employee)
@@ -45,6 +46,7 @@ class LoginView(APIView):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def department_employees(request, department_id):
     employees = Employee.objects.filter(department__id=department_id).select_related('user')
     data = []
