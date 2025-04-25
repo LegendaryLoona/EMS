@@ -9,13 +9,49 @@ from .serializers import CustomUserSerializer
 from .serializers import DepartmentSerializer, CustomUserSerializer, EmployeeSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
-
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Attendance, Employee
 from .serializers import AttendanceSerializer
 from django.utils import timezone
+from datetime import timedelta, date
+
+
+
+
+class EmployeeMonthlyAttendanceView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, employee_id):
+        today = timezone.now().date()
+        thirty_days_ago = today - timedelta(days=30)
+
+        try:
+            employee = Employee.objects.get(id=employee_id)
+        except Employee.DoesNotExist:
+            return Response({'error': 'Employee not found'}, status=404)
+
+        # Fetch attendances in the last 30 days
+        attendances = Attendance.objects.filter(employee=employee, date__gte=thirty_days_ago)
+
+        attendance_map = {att.date: att for att in attendances}
+        result = []
+
+        for i in range(30):
+            day = today - timedelta(days=i)
+            att = attendance_map.get(day)
+            result.append({
+                'date': day,
+                'clock_in': att.clock_in if att else None,
+                'clock_out': att.clock_out if att else None,
+                'was_present': bool(att and att.clock_in),
+            })
+
+        return Response(result[::-1])  # Oldest to newest
+
+
+
 
 class MarkAttendanceView(APIView):
     permission_classes = [permissions.IsAuthenticated]

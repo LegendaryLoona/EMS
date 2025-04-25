@@ -8,7 +8,9 @@ function ManagerDashboard({ user }) {
 
   const token = localStorage.getItem('accessToken');
   const config = { headers: { Authorization: `Bearer ${token}` } };
-
+  const [attendanceHistory, setAttendanceHistory] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  
   useEffect(() => {
     // Fetch manager's employee profile
     axios.get(`${process.env.REACT_APP_API_URL}/api/my-profile/`, config)
@@ -44,6 +46,15 @@ function ManagerDashboard({ user }) {
         alert('Failed to mark attendance. Try again.');
       });
   };
+  const fetchAttendanceHistory = (employeeId) => {
+    setSelectedEmployee(employeeId);
+    axios.get(`${process.env.REACT_APP_API_URL}/api/attendance/${employeeId}/monthly/`, config)
+      .then(res => setAttendanceHistory(res.data))
+      .catch(err => {
+        console.error('Failed to fetch attendance history:', err);
+        alert('Could not load attendance history.');
+      });
+  };
   
   return (
     <div className="dashboard employee-dashboard">
@@ -57,6 +68,10 @@ function ManagerDashboard({ user }) {
         <button className={activeTab === 'department' ? 'active' : ''} onClick={() => setActiveTab('department')}>
           My Department
         </button>
+        <button className={activeTab === 'attendance' ? 'active' : ''} onClick={() => setActiveTab('attendance')}>
+          Attendance History
+        </button>
+
       </div>
 
       <div className="dashboard-content" style={{ marginTop: '1rem' }}>
@@ -127,9 +142,46 @@ function ManagerDashboard({ user }) {
                 </tbody>
               </table>
 
-          </div>
-          
+          </div>          
         )}
+        {activeTab === 'attendance' && (
+        <div>
+          <h3>Attendance History (Last 30 Days)</h3>
+
+          <select onChange={(e) => fetchAttendanceHistory(e.target.value)} defaultValue="">
+            <option value="" disabled>Select an Employee</option>
+            {departmentEmployees.map(emp => (
+              <option key={emp.id} value={emp.id}>
+                {emp.first_name} {emp.last_name}
+              </option>
+            ))}
+          </select>
+
+          {selectedEmployee && attendanceHistory.length > 0 && (
+            <table className="employee-table" style={{ marginTop: '1rem' }}>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Clock In</th>
+                  <th>Clock Out</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {attendanceHistory.map((entry, index) => (
+                  <tr key={index}>
+                    <td>{new Date(entry.date).toLocaleDateString()}</td>
+                    <td>{entry.clock_in ? new Date(entry.clock_in).toLocaleTimeString() : '-'}</td>
+                    <td>{entry.clock_out ? new Date(entry.clock_out).toLocaleTimeString() : '-'}</td>
+                    <td>{entry.was_present ? 'Present' : 'Absent'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+
       </div>
     </div>
   );
