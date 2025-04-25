@@ -10,6 +10,39 @@ function ManagerDashboard({ user }) {
   const config = { headers: { Authorization: `Bearer ${token}` } };
   const [attendanceHistory, setAttendanceHistory] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [taskForm, setTaskForm] = useState({
+    assigned_to: '',
+    title: '',
+    description: '',
+    deadline: ''
+  });
+  const [taskList, setTaskList] = useState([]);
+  
+  const fetchTasks = () => {
+    axios.get(`${process.env.REACT_APP_API_URL}/api/tasks/`, config)
+      .then(res => setTaskList(res.data))
+      .catch(err => console.error('Fetching tasks failed', err));
+  };
+  
+  const handleAssignTask = (e) => {
+    e.preventDefault();
+    const payload = {
+      ...taskForm,
+      assigned_by: employeeProfile.id // manager employee ID
+    };
+    axios.post(`${process.env.REACT_APP_API_URL}/api/tasks/`, payload, config)
+      .then(() => {
+        fetchTasks();
+        setTaskForm({ assigned_to: '', title: '', description: '', deadline: '' });
+      })
+      .catch(err => console.error('Error assigning task', err));
+  };
+  
+  useEffect(() => {
+    if (employeeProfile?.id) {
+      fetchTasks();
+    }
+  }, [employeeProfile]);
   
   useEffect(() => {
     // Fetch manager's employee profile
@@ -70,6 +103,9 @@ function ManagerDashboard({ user }) {
         </button>
         <button className={activeTab === 'attendance' ? 'active' : ''} onClick={() => setActiveTab('attendance')}>
           Attendance History
+        </button>
+        <button className={activeTab === 'tasks' ? 'active' : ''} onClick={() => setActiveTab('tasks')}>
+          Tasks
         </button>
 
       </div>
@@ -181,6 +217,57 @@ function ManagerDashboard({ user }) {
           )}
         </div>
       )}
+  {activeTab === 'tasks' && (
+    <div>
+      <h3>Assign Tasks</h3>
+
+      <form onSubmit={handleAssignTask} style={{ marginBottom: '1.5rem' }}>
+        <div className="form-row">
+          <select required value={taskForm.assigned_to} onChange={e => setTaskForm({...taskForm, assigned_to: e.target.value})}>
+            <option value="">Select Employee</option>
+            {departmentEmployees.map(emp => (
+              <option key={emp.id} value={emp.id}>{emp.first_name} {emp.last_name}</option>
+            ))}
+          </select>
+
+          <input type="text" placeholder="Task title" required
+            value={taskForm.title}
+            onChange={e => setTaskForm({...taskForm, title: e.target.value})} />
+
+          <input type="date" value={taskForm.deadline}
+            onChange={e => setTaskForm({...taskForm, deadline: e.target.value})} />
+        </div>
+
+        <textarea placeholder="Task description" rows="3"
+          value={taskForm.description}
+          onChange={e => setTaskForm({...taskForm, description: e.target.value})} />
+
+        <button type="submit">Assign Task</button>
+      </form>
+
+      <h4>Task List</h4>
+      <table className="employee-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Assigned To</th>
+            <th>Status</th>
+            <th>Deadline</th>
+          </tr>
+        </thead>
+        <tbody>
+          {taskList.map(task => (
+            <tr key={task.id}>
+              <td>{task.title}</td>
+              <td>{task.assigned_to_name}</td>
+              <td>{task.status}</td>
+              <td>{task.deadline}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+)}
 
       </div>
     </div>

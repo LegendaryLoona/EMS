@@ -2,13 +2,13 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
-from .views import LoginView, UserViewSet, TestAuthView, DepartmentViewSet, EmployeeViewSet, department_employees, my_profile, MarkAttendanceView, EmployeeMonthlyAttendanceView, MyAttendanceView
+from .views import LoginView, UserViewSet, TestAuthView, DepartmentViewSet, EmployeeViewSet, department_employees, my_profile, TaskViewSet, MarkAttendanceView, EmployeeMonthlyAttendanceView, MyAttendanceView
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet)
 router.register(r'departments', DepartmentViewSet)
 router.register(r'employees', EmployeeViewSet)
-
+router.register(r'tasks', TaskViewSet, basename='task')
 
 urlpatterns = [
     path('', include(router.urls)),

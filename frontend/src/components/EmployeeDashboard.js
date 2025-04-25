@@ -5,6 +5,15 @@ function EmployeeDashboard({ user }) {
   const [activeTab, setActiveTab] = useState('profile');
   const [employeeProfile, setEmployeeProfile] = useState(null);
   const [attendanceRecords, setAttendanceRecords] = useState([]);
+  useEffect(() => {
+    axios.get(`${process.env.REACT_APP_API_URL}/api/my-profile/`, config)
+      .then(res => {
+        setEmployeeProfile(res.data);
+        axios.get(`${process.env.REACT_APP_API_URL}/api/tasks/?assigned_to=${res.data.id}`, config)
+          .then(taskRes => setMyTasks(taskRes.data));
+      })
+      .catch(err => console.error('Error:', err));
+  }, []);
   
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/api/my-profile/`, config)
@@ -36,6 +45,10 @@ function EmployeeDashboard({ user }) {
   <button className={activeTab === 'attendance' ? 'active' : ''} onClick={() => setActiveTab('attendance')}>
     Attendance
   </button>
+  <button className={activeTab === 'tasks' ? 'active' : ''} onClick={() => setActiveTab('tasks')}>
+  My Tasks
+  </button>   
+
 </div>
 
   <div className="dashboard-content" style={{ marginTop: '1rem' }}>
@@ -79,6 +92,34 @@ function EmployeeDashboard({ user }) {
         )}
       </div>
     )}
+    {activeTab === 'tasks' && (
+    <div>
+      <h3>My Tasks</h3>
+      {myTasks.length === 0 ? <p>No tasks assigned.</p> : (
+        <table className="employee-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Deadline</th>
+            </tr>
+          </thead>
+          <tbody>
+            {myTasks.map(task => (
+              <tr key={task.id}>
+                <td>{task.title}</td>
+                <td>{task.description}</td>
+                <td>{task.status}</td>
+                <td>{task.deadline}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  )}
+
   </div>
 
     </div>
