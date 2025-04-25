@@ -5,6 +5,9 @@ function EmployeeDashboard({ user }) {
   const [activeTab, setActiveTab] = useState('profile');
   const [employeeProfile, setEmployeeProfile] = useState(null);
   const [attendanceRecords, setAttendanceRecords] = useState([]);
+  const [myTasks, setMyTasks] = useState([]);
+  const token = localStorage.getItem('accessToken');
+  const config = { headers: { Authorization: `Bearer ${token}` } };
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/api/my-profile/`, config)
       .then(res => {
@@ -25,8 +28,6 @@ function EmployeeDashboard({ user }) {
       .catch(err => console.error('Error fetching attendance:', err));
   }, []);
   
-  const token = localStorage.getItem('accessToken');
-  const config = { headers: { Authorization: `Bearer ${token}` } };
   
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/api/my-profile/`, config)
