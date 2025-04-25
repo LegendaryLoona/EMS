@@ -1,6 +1,6 @@
 # serializers.py
 from rest_framework import serializers
-from .models import Department, CustomUser, Employee, Attendance, LeaveType, LeaveRequest, Document
+from .models import Department, CustomUser, Employee, Attendance, Task
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 
@@ -88,28 +88,10 @@ class AttendanceSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('id',)
 
+class TaskSerializer(serializers.ModelSerializer):
+    assigned_to_name = serializers.ReadOnlyField(source='assigned_to.first_name')
+    assigned_by_name = serializers.ReadOnlyField(source='assigned_by.first_name')
 
-class LeaveTypeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = LeaveType
+        model = Task
         fields = '__all__'
-
-
-class LeaveRequestSerializer(serializers.ModelSerializer):
-    employee_name = serializers.ReadOnlyField(source='employee.first_name', read_only=True)
-    leave_type_name = serializers.ReadOnlyField(source='leave_type.name', read_only=True)
-    days_requested = serializers.ReadOnlyField()
-    
-    class Meta:
-        model = LeaveRequest
-        fields = '__all__'
-        read_only_fields = ('id', 'created_at', 'updated_at')
-
-
-class DocumentSerializer(serializers.ModelSerializer):
-    employee_name = serializers.ReadOnlyField(source='employee.first_name', read_only=True)
-    
-    class Meta:
-        model = Document
-        fields = '__all__'
-        read_only_fields = ('id', 'uploaded_at')

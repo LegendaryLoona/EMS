@@ -51,6 +51,15 @@ class EmployeeMonthlyAttendanceView(APIView):
         return Response(result[::-1])  # Oldest to newest
 
 
+class MyAttendanceView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        employee = request.user.employee_profile
+        attendances = Attendance.objects.filter(employee=employee).order_by('-date')[:30]  # last 30 days
+        serializer = AttendanceSerializer(attendances, many=True)
+        return Response(serializer.data)
+
 
 
 class MarkAttendanceView(APIView):

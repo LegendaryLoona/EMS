@@ -56,7 +56,6 @@ class Employee(models.Model):
 
 
 class Attendance(models.Model):
-    """Attendance model for tracking employee work hours"""
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='attendances')
     date = models.DateField(default=timezone.now)
     clock_in = models.DateTimeField(null=True, blank=True)
@@ -72,60 +71,23 @@ class Attendance(models.Model):
     def __str__(self):
         return f"{self.employee} - {self.date}"
 
-
-class LeaveType(models.Model):
-    """Model for defining different types of leave"""
-    name = models.CharField(max_length=50)
-    description = models.TextField(blank=True, null=True)
-    default_days = models.PositiveIntegerField(default=0)
-    
-    def __str__(self):
-        return self.name
-
-
-class LeaveRequest(models.Model):
-    """Model for employee leave requests"""
+class Task(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
     )
-    
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='leave_requests')
-    leave_type = models.ForeignKey(LeaveType, on_delete=models.CASCADE)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    reason = models.TextField()
+
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    approved_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
+    deadline = models.DateField(null=True, blank=True)
+    
+    assigned_to = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='tasks')
+    assigned_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='assigned_tasks')
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
-    @property
-    def days_requested(self):
-        delta = self.end_date - self.start_date
-        return delta.days + 1
-    
-    def __str__(self):
-        return f"{self.employee} - {self.leave_type} ({self.status})"
 
-
-class Document(models.Model):
-    """Model for employee documents"""
-    DOCUMENT_TYPES = (
-        ('contract', 'Contract'),
-        ('id', 'Identification'),
-        ('certificate', 'Certificate'),
-        ('resume', 'Resume'),
-        ('other', 'Other'),
-    )
-    
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='documents')
-    title = models.CharField(max_length=100)
-    document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPES)
-    file = models.FileField(upload_to='employee_documents/')
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateField(null=True, blank=True)
-    
     def __str__(self):
-        return f"{self.employee} - {self.title}"
+        return f"{self.title} → {self.assigned_to.first_name} ({self.status})"
