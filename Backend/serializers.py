@@ -61,10 +61,16 @@ class CustomUserSerializer(serializers.ModelSerializer):
 class EmployeeSerializer(serializers.ModelSerializer):
     department_name = serializers.ReadOnlyField(source='department.name')
     manager_name = serializers.ReadOnlyField(source='manager.first_name', read_only=True)
-    
+    manager_email = serializers.SerializerMethodField()
+
+    def get_manager_email(self, obj):
+        if obj.manager and obj.manager.user:
+            return obj.manager.user.email
+        return None
+
     class Meta:
         model = Employee
-        fields = '__all__'
+        fields = '__all__' + ['department_name', 'manager_name', 'manager_email']
         read_only_fields = ('id',)
 
 
