@@ -70,7 +70,12 @@ class EmployeeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Employee
-        fields = '__all__' + ['department_name', 'manager_name', 'manager_email']
+        fields = [
+            'id', 'user', 'employee_id', 'first_name', 'last_name',
+            'gender', 'date_of_birth', 'address', 'hire_date',
+            'manager', 'position', 'salary', 'department', 'is_active',
+            'department_name', 'manager_name', 'manager_email'
+        ]
         read_only_fields = ('id',)
 
 
