@@ -19,7 +19,7 @@ urlpatterns = [
     path('departments/<int:department_id>/employees/', department_employees),
     path('attendance/mark/', MarkAttendanceView.as_view(), name='mark-attendance'),
     path('attendance/<int:employee_id>/monthly/', EmployeeMonthlyAttendanceView.as_view(), name='monthly-attendance'),
-    path('api/my-attendance/', MyAttendanceView.as_view(), name='my-attendance'),
+    path('my-attendance/', MyAttendanceView.as_view(), name='my-attendance'),
 
 
 ]
