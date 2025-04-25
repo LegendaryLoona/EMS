@@ -23,7 +23,28 @@ function ManagerDashboard({ user }) {
       })
       .catch(err => console.error('Error fetching profile:', err));
   }, []);
-
+  const markAttendance = (employeeId, action) => {
+    axios.post(`${process.env.REACT_APP_API_URL}/api/attendance/mark/`, {
+      employee_id: employeeId,
+      action,
+    }, config)
+      .then(res => {
+        const { clock_in, clock_out } = res.data;
+        const statusEl = document.getElementById(`status-${employeeId}`);
+        if (statusEl) {
+          if (action === 'clock_in') {
+            statusEl.textContent = `Clocked in at ${new Date(clock_in).toLocaleTimeString()}`;
+          } else {
+            statusEl.textContent = `Clocked out at ${new Date(clock_out).toLocaleTimeString()}`;
+          }
+        }
+      })
+      .catch(err => {
+        console.error('Attendance error:', err);
+        alert('Failed to mark attendance. Try again.');
+      });
+  };
+  
   return (
     <div className="dashboard employee-dashboard">
       <h2>Manager Dashboard</h2>
@@ -76,7 +97,38 @@ function ManagerDashboard({ user }) {
                 </tbody>
               </table>
             )}
+            <h4 style={{ marginTop: '2rem' }}>Mark Attendance</h4>
+              <table className="employee-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Clock In</th>
+                    <th>Clock Out</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {departmentEmployees.map(emp => (
+                    <tr key={emp.id}>
+                      <td>{emp.first_name} {emp.last_name}</td>
+                      <td>
+                        <button onClick={() => markAttendance(emp.id, 'clock_in')}>
+                          Clock In
+                        </button>
+                      </td>
+                      <td>
+                        <button onClick={() => markAttendance(emp.id, 'clock_out')}>
+                          Clock Out
+                        </button>
+                      </td>
+                      <td id={`status-${emp.id}`}></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
           </div>
+          
         )}
       </div>
     </div>

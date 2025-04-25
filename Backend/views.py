@@ -10,6 +10,37 @@ from .serializers import DepartmentSerializer, CustomUserSerializer, EmployeeSer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 
+from rest_framework import generics, permissions
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .models import Attendance, Employee
+from .serializers import AttendanceSerializer
+from django.utils import timezone
+
+class MarkAttendanceView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        employee_id = request.data.get('employee_id')
+        action = request.data.get('action')
+
+        try:
+            employee = Employee.objects.get(id=employee_id)
+        except Employee.DoesNotExist:
+            return Response({'error': 'Employee not found'}, status=404)
+
+        today = timezone.now().date()
+        attendance, created = Attendance.objects.get_or_create(employee=employee, date=today)
+
+        if action == 'clock_in':
+            attendance.clock_in = timezone.now()
+        elif action == 'clock_out':
+            attendance.clock_out = timezone.now()
+        else:
+            return Response({'error': 'Invalid action'}, status=400)
+
+        attendance.save()
+        return Response(AttendanceSerializer(attendance).data)
 
 
 @api_view(['GET'])

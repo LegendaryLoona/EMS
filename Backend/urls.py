@@ -2,7 +2,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
-from .views import LoginView, UserViewSet, TestAuthView, DepartmentViewSet, EmployeeViewSet, department_employees, my_profile
+from .views import LoginView, UserViewSet, TestAuthView, DepartmentViewSet, EmployeeViewSet, department_employees, my_profile, MarkAttendanceView
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet)
@@ -17,4 +17,5 @@ urlpatterns = [
     path('test-auth/', TestAuthView.as_view(), name='test-auth'),
     path('my-profile/', my_profile),
     path('departments/<int:department_id>/employees/', department_employees),
+    path('attendance/mark/', MarkAttendanceView.as_view(), name='mark-attendance'),
 ]
