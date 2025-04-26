@@ -191,3 +191,48 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
+    
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def submit_task(request, task_id):
+    """Employee submits task for review"""
+    try:
+        task = Task.objects.get(id=task_id, assigned_to__user=request.user)
+        if task.status != 'in_progress':
+            return Response({'error': 'Only tasks in progress can be submitted.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        task.status = 'completed'  # Mark as completed for manager to review
+        task.save()
+        return Response({'success': 'Task submitted for review.'}, status=status.HTTP_200_OK)
+    
+    except Task.DoesNotExist:
+        return Response({'error': 'Task not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def review_task(request, task_id):
+    """Manager accepts or rejects a task"""
+    try:
+        task = Task.objects.get(id=task_id, assigned_by__user=request.user)
+        action = request.data.get('action')
+        comment = request.data.get('comment', '')
+
+        if action == 'accept':
+            task.status = 'completed'
+            task.rejection_comment = ''
+            task.save()
+            return Response({'success': 'Task accepted and marked as completed.'}, status=status.HTTP_200_OK)
+        
+        elif action == 'reject':
+            task.status = 'pending'
+            task.rejection_comment = comment
+            task.save()
+            return Response({'success': 'Task rejected and sent back to employee.'}, status=status.HTTP_200_OK)
+        
+        else:
+            return Response({'error': 'Invalid action.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    except Task.DoesNotExist:
+        return Response({'error': 'Task not found.'}, status=status.HTTP_404_NOT_FOUND)

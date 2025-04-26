@@ -77,7 +77,7 @@ class Task(models.Model):
         ('in_progress', 'In Progress'),
         ('completed', 'Completed'),
     )
-
+    rejection_comment = models.TextField(blank=True, null=True)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')

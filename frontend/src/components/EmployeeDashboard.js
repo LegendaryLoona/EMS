@@ -8,6 +8,17 @@ function EmployeeDashboard({ user }) {
   const [myTasks, setMyTasks] = useState([]);
   const token = localStorage.getItem('accessToken');
   const config = { headers: { Authorization: `Bearer ${token}` } };
+  const handleSubmitTask = (taskId) => {
+    axios.post(`${process.env.REACT_APP_API_URL}/api/tasks/${taskId}/submit/`, {}, config)
+      .then(res => {
+        alert('Task submitted!');
+        fetchTasks(); // Re-fetch the updated task list
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Error submitting task.');
+      });
+  };
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/api/my-profile/`, config)
       .then(res => {
@@ -118,6 +129,20 @@ function EmployeeDashboard({ user }) {
           </tbody>
         </table>
       )}
+      {myTasks.map(task => (
+      <tr key={task.id}>
+        <td>{task.title}</td>
+        <td>{task.description}</td>
+        <td>{task.status}</td>
+        <td>{task.deadline}</td>
+        <td>
+          {task.status === 'in_progress' && (
+            <button onClick={() => handleSubmitTask(task.id)}>Submit Task</button>
+          )}
+        </td>
+      </tr>
+    ))}
+
     </div>
   )}
 

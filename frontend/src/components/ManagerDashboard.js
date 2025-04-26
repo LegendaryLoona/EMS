@@ -37,6 +37,17 @@ function ManagerDashboard({ user }) {
       })
       .catch(err => console.error('Error assigning task', err));
   };
+  const handleReviewTask = (taskId, action, comment = '') => {
+    axios.post(`${process.env.REACT_APP_API_URL}/api/tasks/${taskId}/review/`, { action, comment }, config)
+      .then(() => {
+        fetchTasks(); // Refresh task list after review
+        alert(`Task ${action === 'accept' ? 'accepted' : 'rejected'}.`);
+      })
+      .catch(err => {
+        console.error('Error reviewing task:', err);
+        alert('Error processing task review.');
+      });
+  };
   
   useEffect(() => {
     if (employeeProfile?.id) {
@@ -253,18 +264,36 @@ function ManagerDashboard({ user }) {
             <th>Assigned To</th>
             <th>Status</th>
             <th>Deadline</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {taskList.map(task => (
-            <tr key={task.id}>
-              <td>{task.title}</td>
-              <td>{task.assigned_to_name}</td>
-              <td>{task.status}</td>
-              <td>{task.deadline}</td>
-            </tr>
-          ))}
-        </tbody>
+        {taskList.map(task => (
+        <tr key={task.id}>
+          <td>{task.title}</td>
+          <td>{task.assigned_to_name}</td>
+          <td>{task.status}</td>
+          <td>{task.deadline}</td>
+          <td>
+            {task.status === 'completed' ? (
+              <div>
+                <button onClick={() => handleReviewTask(task.id, 'accept')}>Accept</button>
+                <button onClick={() => {
+                  const comment = prompt('Reason for rejection:');
+                  if (comment !== null) {
+                    handleReviewTask(task.id, 'reject', comment);
+                  }
+                }}>
+                  Reject
+                </button>
+              </div>
+            ) : (
+              <span>-</span>
+            )}
+          </td>
+        </tr>
+      ))}
+    </tbody>
       </table>
     </div>
 )}
