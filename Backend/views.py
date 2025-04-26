@@ -203,7 +203,7 @@ def submit_task(request, task_id):
         if task.status != 'in_progress':
             return Response({'error': 'Only tasks in progress can be submitted.'}, status=status.HTTP_400_BAD_REQUEST)
         
-        task.status = 'completed'  # Mark as completed for manager to review
+        task.status = 'submitted'  # Mark as completed for manager to review
         task.save()
         return Response({'success': 'Task submitted for review.'}, status=status.HTTP_200_OK)
     
