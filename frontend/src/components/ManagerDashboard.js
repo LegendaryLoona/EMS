@@ -38,8 +38,8 @@ function ManagerDashboard({ user }) {
       .catch(err => console.error('Error assigning task', err));
   };
 
-  const handleReviewTask = (taskId, action, comment = '') => {
-    axios.post(`${process.env.REACT_APP_API_URL}/api/tasks/${taskId}/review/`, { action, comment }, config)
+  const handleReviewTask = (taskId, action, rejection_comment = '') => {
+    axios.post(`${process.env.REACT_APP_API_URL}/api/tasks/${taskId}/review/`, { action, rejection_comment }, config)
       .then(() => {
         fetchTasks();
         alert(`Task ${action === 'accept' ? 'accepted' : 'rejected'}.`);
@@ -275,15 +275,15 @@ function ManagerDashboard({ user }) {
                     <td>{task.assigned_to_name}</td>
                     <td>{task.status}</td>
                     <td>{task.deadline}</td>
-                    <td>{task.comment || '-'}</td>
+                    <td>{task.rejection_comment || '-'}</td>
                     <td>
                       {task.status === 'submitted' ? (
                         <div>
                           <button onClick={() => handleReviewTask(task.id, 'accept')}>Accept</button>
                           <button onClick={() => {
-                            const comment = prompt('Reason for rejection:');
-                            if (comment !== null) {
-                              handleReviewTask(task.id, 'reject', comment);
+                            const rejection_comment = prompt('Reason for rejection:');
+                            if (rejection_comment !== null) {
+                              handleReviewTask(task.id, 'reject', rejection_comment);
                             }
                           }}>
                             Reject

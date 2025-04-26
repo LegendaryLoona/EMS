@@ -135,7 +135,7 @@ function EmployeeDashboard({ user }) {
                       <td>{task.description}</td>
                       <td>{task.status}</td>
                       <td>{task.deadline}</td>
-                      <td>{task.comment ? task.comment : '—'}</td>
+                      <td>{task.rejection_comment ? task.rejection_comment : '—'}</td>
                       <td>
                         {task.status === 'in_progress' && (
                           <button onClick={() => handleSubmitTask(task.id)}>
