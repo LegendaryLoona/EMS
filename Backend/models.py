@@ -80,7 +80,7 @@ class Task(models.Model):
     rejection_comment = models.TextField(blank=True, null=True)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_progress')
     deadline = models.DateField(null=True, blank=True)
     
     assigned_to = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='tasks')

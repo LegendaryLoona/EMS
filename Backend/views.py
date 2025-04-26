@@ -226,7 +226,7 @@ def review_task(request, task_id):
             return Response({'success': 'Task accepted and marked as completed.'}, status=status.HTTP_200_OK)
         
         elif action == 'reject':
-            task.status = 'pending'
+            task.status = 'in_progress'
             task.rejection_comment = comment
             task.save()
             return Response({'success': 'Task rejected and sent back to employee.'}, status=status.HTTP_200_OK)
