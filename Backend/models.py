@@ -74,15 +74,15 @@ class Attendance(models.Model):
 class Task(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
-        ('submitted', 'Submitted'),
+        ('in_progress', 'In Progress'),
         ('completed', 'Completed'),
     )
-    comment = models.TextField(blank=True)
+
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     deadline = models.DateField(null=True, blank=True)
-
+    
     assigned_to = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='tasks')
     assigned_by = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, related_name='assigned_tasks')
     

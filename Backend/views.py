@@ -1,3 +1,4 @@
+# views.py
 from rest_framework import viewsets, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -190,44 +191,3 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
-    
-    
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def submit_task(request, task_id):
-    try:
-        task = Task.objects.get(id=task_id, employee__user=request.user)
-    except Task.DoesNotExist:
-        return Response({'error': 'Task not found.'}, status=status.HTTP_404_NOT_FOUND)
-    
-    if task.status != 'pending':
-        return Response({'error': 'Only pending tasks can be submitted.'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    task.status = 'submitted'
-    task.save()
-    return Response({'message': 'Task submitted for review.'}, status=status.HTTP_200_OK)
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def review_task(request, task_id):
-    try:
-        task = Task.objects.get(id=task_id, employee__manager__user=request.user)
-    except Task.DoesNotExist:
-        return Response({'error': 'Task not found.'}, status=status.HTTP_404_NOT_FOUND)
-    
-    action = request.data.get('action')
-    comment = request.data.get('comment', '')
-
-    if action not in ['accept', 'reject']:
-        return Response({'error': 'Invalid action.'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    if action == 'accept':
-        task.status = 'completed'
-        task.comment = ''
-    else:  # reject
-        task.status = 'pending'
-        task.comment = comment
-
-    task.save()
-    return Response({'message': f'Task {action}ed successfully.'}, status=status.HTTP_200_OK)
