@@ -141,7 +141,7 @@ function EmployeeDashboard({ user }) {
                             Submit Task
                           </button>
                         )}
-                        {(task.status === 'pending' || task.status === 'completed') && (
+                        {(task.status === 'submitted' || task.status === 'completed') && (
                           <span>-</span>
                         )}
                       </td>

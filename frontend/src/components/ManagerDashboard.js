@@ -275,7 +275,7 @@ function ManagerDashboard({ user }) {
           <td>{task.status}</td>
           <td>{task.deadline}</td>
           <td>
-            {task.status === 'completed' ? (
+            {task.status === 'submitted' ? (
               <div>
                 <button onClick={() => handleReviewTask(task.id, 'accept')}>Accept</button>
                 <button onClick={() => {

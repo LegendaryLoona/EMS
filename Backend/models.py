@@ -73,8 +73,8 @@ class Attendance(models.Model):
 
 class Task(models.Model):
     STATUS_CHOICES = (
-        ('pending', 'Pending'),
         ('in_progress', 'In Progress'),
+        ('submitted', 'Submitted'),
         ('completed', 'Completed'),
     )
     rejection_comment = models.TextField(blank=True, null=True)
