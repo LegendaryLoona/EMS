@@ -217,7 +217,7 @@ def review_task(request, task_id):
     try:
         task = Task.objects.get(id=task_id, assigned_by__user=request.user)
         action = request.data.get('action')
-        comment = request.data.get('rejection_comment', '')
+        comment = request.data.get('comment', '')
 
         if action == 'accept':
             task.status = 'completed'
