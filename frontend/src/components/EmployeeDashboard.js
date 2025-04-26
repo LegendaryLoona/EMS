@@ -8,11 +8,16 @@ function EmployeeDashboard({ user }) {
   const [myTasks, setMyTasks] = useState([]);
   const token = localStorage.getItem('accessToken');
   const config = { headers: { Authorization: `Bearer ${token}` } };
+  const fetchTasks = () => {
+    axios.get(`${process.env.REACT_APP_API_URL}/api/tasks/`, config)
+      .then(res => setTaskList(res.data))
+      .catch(err => console.error('Fetching tasks failed', err));
+  };
   const handleSubmitTask = (taskId) => {
     axios.post(`${process.env.REACT_APP_API_URL}/api/tasks/${taskId}/submit/`, {}, config)
       .then(res => {
         alert('Task submitted!');
-        fetchTasks(); // Re-fetch the updated task list
+        fetchTasks();
       })
       .catch(err => {
         console.error(err);
