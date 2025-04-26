@@ -13,7 +13,6 @@ function EmployeeDashboard({ user }) {
   const fetchTasks = () => {
     axios.get(`${process.env.REACT_APP_API_URL}/api/tasks/`, config)
       .then(res => {
-        // Filter tasks assigned to the logged-in employee
         const employeeId = employeeProfile?.id;
         if (employeeId) {
           const tasksForMe = res.data.filter(task => task.assigned_to === employeeId);
@@ -125,6 +124,7 @@ function EmployeeDashboard({ user }) {
                     <th>Description</th>
                     <th>Status</th>
                     <th>Deadline</th>
+                    <th>Manager Comment</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -135,6 +135,7 @@ function EmployeeDashboard({ user }) {
                       <td>{task.description}</td>
                       <td>{task.status}</td>
                       <td>{task.deadline}</td>
+                      <td>{task.comment ? task.comment : '—'}</td>
                       <td>
                         {task.status === 'in_progress' && (
                           <button onClick={() => handleSubmitTask(task.id)}>
