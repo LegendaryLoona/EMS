@@ -9,10 +9,10 @@
 
 const std::string DB_CONNECTION = std::getenv("DB_CONNECTION_STRING") ? 
     std::getenv("DB_CONNECTION_STRING") : 
-    "dbname=your_db user=your_user password=your_password host=localhost port=5432";
+    "";
 const std::string JWT_SECRET = std::getenv("JWT_SECRET") ? 
     std::getenv("JWT_SECRET") : 
-    "your_jwt_secret_key";
+    "";
 const int PORT = std::getenv("PORT") ? std::atoi(std::getenv("PORT")) : 8080;
 
 class MobileAPIServer {

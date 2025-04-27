@@ -1,5 +1,7 @@
 FROM ubuntu:22.04
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -9,7 +11,8 @@ RUN apt-get update && apt-get install -y \
     libpqxx-dev \
     postgresql-client \
     curl \
-    && rm -rf /var/lib/apt/lists/*
+    libasio-dev && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -27,8 +30,8 @@ RUN mkdir -p build && \
 
 EXPOSE 8080
 
-ENV DB_CONNECTION_STRING="dbname=your_db user=your_user password=your_password host=your_host port=5432"
-ENV JWT_SECRET="your_jwt_secret_key"
+ENV DB_CONNECTION_STRING=""
+ENV JWT_SECRET=""
 ENV PORT=8080
 
 CMD ["./build/mobile_server"]
