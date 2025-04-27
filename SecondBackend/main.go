@@ -53,20 +53,15 @@ type EmployeeProfile struct {
 }
 
 func getEmployeeProfile(c *gin.Context) {
-	// Assume the user ID is passed in the Authorization header or as a query parameter
-	// Example: "Authorization: Bearer <token>"
-	userID := c.DefaultQuery("user_id", "") // Just for simplicity, using a query parameter (replace with actual logic)
+	userID := c.DefaultQuery("user_id", "")
 
-	// Validate user ID (in production, you would get this from the token/session)
 	if userID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
 		return
 	}
 
-	// Query the employee profile from the database based on the user ID
 	var employee EmployeeProfile
 
-	// Assuming the employee table has a foreign key to user, e.g., user_id
 	query := `
 		SELECT employee_id, first_name, last_name, gender, date_of_birth, address, hire_date, 
 		       manager, position, salary, department, is_active
@@ -88,7 +83,6 @@ func getEmployeeProfile(c *gin.Context) {
 		return
 	}
 
-	// Return the employee profile as JSON
 	c.JSON(http.StatusOK, employee)
 }
 
