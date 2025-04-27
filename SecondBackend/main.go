@@ -1,4 +1,3 @@
-// main.go
 package main
 
 import (
@@ -11,10 +10,19 @@ import (
 
 func main() {
 	r := gin.Default()
-	r.Use(cors.Default())
+
+	// Explicit CORS setup for more control
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"}, // React app URL
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		AllowCredentials: true,
+	}))
+
 	r.GET("/", func(c *gin.Context) {
 		c.String(200, "Hello from Go + Gin + Render!")
 	})
+
 	r.GET("/profile", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"first_name": "John",
