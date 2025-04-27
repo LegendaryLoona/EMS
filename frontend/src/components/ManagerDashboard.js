@@ -356,9 +356,9 @@ function ManagerDashboard({ user }) {
                 {requestList.map(req => (
                   <tr key={req.id}>
                     <td>{req.name}</td>
-                    <td>{req.date}</td>
+                    <td>{new Date(req.date_submitted).toLocaleDateString()}</td>
                     <td>{req.status}</td>
-                    <td>{req.comment || '-'}</td>
+                    <td>{req.admin_comment || '-'}</td>
                   </tr>
                 ))}
               </tbody>
