@@ -88,21 +88,22 @@ func getEmployeeProfile(c *gin.Context) {
 	// If the employee has a manager, query for the manager's name
 	if employee.Manager != nil {
 		// Query to get the manager's name (based on manager_id)
-		var managerName string
+		var managerFirstName, managerLastName string
 		managerQuery := `
 			SELECT first_name, last_name 
 			FROM "Backend_employee"
 			WHERE employee_id = $1
 		`
 
-		err = db.QueryRow(managerQuery, *employee.Manager).Scan(&managerName)
+		err = db.QueryRow(managerQuery, *employee.Manager).Scan(&managerFirstName, &managerLastName)
 		if err != nil {
 			log.Printf("Error fetching manager data: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching manager data"})
 			return
 		}
 		// Set the manager's name in the employee struct
-		employee.Manager = &managerName
+		managerFullName := managerFirstName + " " + managerLastName
+		employee.Manager = &managerFullName
 	}
 	// if employee.Department != nil {
 	// 	// Query to get the manager's name (based on manager_id)
