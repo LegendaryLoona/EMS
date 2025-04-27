@@ -1,4 +1,3 @@
-# serializers.py
 from rest_framework import serializers
 from .models import Department, CustomUser, Employee, Attendance, Task, Request
 from django.contrib.auth import get_user_model
@@ -33,7 +32,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        password = validated_data.pop('password')  # No KeyError now
+        password = validated_data.pop('password')
         role = validated_data.get('role')
         user = User(**validated_data)
         user.set_password(password)
@@ -51,7 +50,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
-        if password:  # Only set if provided
+        if password:
             instance.set_password(password)
 
         instance.save()

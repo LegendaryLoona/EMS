@@ -25,7 +25,6 @@ class EmployeeMonthlyAttendanceView(APIView):
         except Employee.DoesNotExist:
             return Response({'error': 'Employee not found'}, status=404)
 
-        # Fetch attendances in the last 30 days
         attendances = Attendance.objects.filter(employee=employee, date__gte=thirty_days_ago)
 
         attendance_map = {att.date: att for att in attendances}
@@ -41,7 +40,7 @@ class EmployeeMonthlyAttendanceView(APIView):
                 'was_present': bool(att and att.clock_in),
             })
 
-        return Response(result[::-1])  # Oldest to newest
+        return Response(result[::-1]) 
 
 
 class MyAttendanceView(APIView):
@@ -49,7 +48,7 @@ class MyAttendanceView(APIView):
 
     def get(self, request):
         employee = request.user.employee_profile
-        attendances = Attendance.objects.filter(employee=employee).order_by('-date')[:30]  # last 30 days
+        attendances = Attendance.objects.filter(employee=employee).order_by('-date')[:30]  
         serializer = AttendanceSerializer(attendances, many=True)
         return Response(serializer.data)
 
@@ -151,7 +150,6 @@ class UserViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
 
-# Simple test view to verify authentication
 class TestAuthView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     
@@ -193,13 +191,12 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def submit_task(request, task_id):
-    """Employee submits task for review"""
     try:
         task = Task.objects.get(id=task_id, assigned_to__user=request.user)
         if task.status != 'in_progress':
             return Response({'error': 'Only tasks in progress can be submitted.'}, status=status.HTTP_400_BAD_REQUEST)
         
-        task.status = 'submitted'  # Mark as completed for manager to review
+        task.status = 'submitted'
         task.save()
         return Response({'success': 'Task submitted for review.'}, status=status.HTTP_200_OK)
     
@@ -209,7 +206,6 @@ def submit_task(request, task_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def review_task(request, task_id):
-    """Manager accepts or rejects a task"""
     try:
         task = Task.objects.get(id=task_id, assigned_by__user=request.user)
         action = request.data.get('action')
@@ -244,13 +240,11 @@ class RequestListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(submitted_by=self.request.user.employee_profile)
 
-# Admin: View all requests
 class RequestAdminListView(generics.ListAPIView):
     queryset = Request.objects.all()
     serializer_class = RequestSerializer
     permission_classes = [permissions.IsAdminUser]
 
-# Admin: Update a request (complete or decline)
 class RequestReviewView(generics.UpdateAPIView):
     queryset = Request.objects.all()
     serializer_class = RequestSerializer
