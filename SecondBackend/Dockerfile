@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy source code
-COPY server.cpp .
+COPY main.cpp .
 
 # Download Crow
 RUN curl -L https://github.com/CrowCpp/crow/releases/latest/download/crow_all.h -o crow_all.h
