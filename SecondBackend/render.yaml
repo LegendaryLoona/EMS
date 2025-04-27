@@ -1,10 +1,9 @@
 services:
   - type: web
-    name: crow-mobile-server
-    env: docker
-    plan: free
-    dockerfilePath: ./Dockerfile
-    healthCheckPath: /
+    name: mobile-dashboard-api
+    runtime: go
+    buildCommand: go build -o server
+    startCommand: ./server
     envVars:
       - key: PORT
         value: 8080
