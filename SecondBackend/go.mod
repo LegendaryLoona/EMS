@@ -1,6 +1,6 @@
 module mobile-dashboard-api
 
-go 1.24.2
+go 1.24.0
 
 require (
 	github.com/bytedance/sonic v1.11.6 // indirect
