@@ -102,8 +102,7 @@ class RequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Request
-        fields = ['id', 'name', 'description', 'date_submitted', 'submitted_by', 'submitted_by_name', 'status', 'admin_comment']
-        read_only_fields = ['id', 'date_submitted', 'status', 'admin_comment']
+        fields = '__all__'
 
     def get_submitted_by_name(self, obj):
         return f"{obj.submitted_by.first_name} {obj.submitted_by.last_name}"
