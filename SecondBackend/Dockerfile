@@ -18,7 +18,7 @@ COPY server.cpp .
 RUN curl -L https://github.com/CrowCpp/crow/releases/latest/download/crow_all.h -o crow_all.h
 
 # Build server
-RUN g++ server.cpp -o server -pthread
+RUN g++ main.cpp -o server -pthread
 
 # Expose port
 EXPOSE 8080
