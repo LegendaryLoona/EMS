@@ -39,8 +39,8 @@ function MobileDashboard({ user }) {
       {profile ? (
         <div>
           <h3>{profile.first_name} {profile.last_name}</h3>
-          <p><strong>Email:</strong> {profile.email || 'N/A'}</p>
           <p><strong>Position:</strong> {profile.position || 'N/A'}</p>
+          <p><strong>Manager:</strong> {profile.manager || 'N/A'}</p>
           <p><strong>Department:</strong> {profile.department || 'N/A'}</p>
           <p><strong>Salary:</strong> ${profile.salary || 'N/A'}</p>
           <p><strong>Hire Date:</strong> {profile.hire_date || 'N/A'}</p>
