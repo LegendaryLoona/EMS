@@ -15,7 +15,6 @@ function MobileDashboard({ user }) {
       })
       .catch(err => {
         console.error('Error fetching mobile profile:', err);
-        setError('Failed to load profile.');
       });
   }, []);
   
