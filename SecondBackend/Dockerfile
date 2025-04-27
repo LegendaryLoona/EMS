@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     cmake \
     git \
     libboost-all-dev \
+    libboost-system-dev \
     libssl-dev \
     libpqxx-dev \
     postgresql-client \
@@ -31,7 +32,7 @@ RUN mkdir -p build && \
 EXPOSE 8080
 
 ENV DB_CONNECTION_STRING=""
-ENV JWT_SECRET=""
+ENV JWT_SECRET="" 
 ENV PORT=8080
 
 CMD ["./build/mobile_server"]
