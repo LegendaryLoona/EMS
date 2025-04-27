@@ -65,7 +65,7 @@ func getEmployeeProfile(c *gin.Context) {
 	query := `
 		SELECT employee_id, first_name, last_name, gender, date_of_birth, address, hire_date, 
 		       manager, position, salary, department, is_active
-		FROM employee
+		FROM Employee
 		WHERE user_id = $1
 	`
 	row := db.QueryRow(query, userID)

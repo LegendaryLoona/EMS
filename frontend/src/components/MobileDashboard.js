@@ -15,7 +15,7 @@ function MobileDashboard({ user }) {
   useEffect(() => {
     if (user && user.id) {
       // Make sure user.id is available for the API call
-      axios.get(`${process.env.REACT_APP_MOBILE_API_URL}/profile?user_id=1`, config)
+      axios.get(`${process.env.REACT_APP_MOBILE_API_URL}/profile?user_id=2`, config)
         .then(res => {
           console.log('Profile data:', res.data);  // Log the response for debugging
           setProfile(res.data);
