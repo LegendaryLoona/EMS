@@ -1,38 +1,50 @@
-FROM ubuntu:22.04
+FROM ubuntu:22.04 as builder
 
-ENV DEBIAN_FRONTEND=noninteractive
-
+# Install dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
     git \
     libboost-all-dev \
-    libboost-system-dev \
-    libssl-dev \
+    libpq-dev \
     libpqxx-dev \
-    postgresql-client \
+    nlohmann-json3-dev \
     curl \
-    libasio-dev && \
-    rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
+# Install Crow
+RUN curl -sSL https://github.com/CrowCpp/Crow/releases/download/v1.0+5/crow-v1.0+5.deb -o crow.deb \
+    && dpkg -i crow.deb \
+    && rm crow.deb
+
+# Create working directory
 WORKDIR /app
 
-RUN mkdir -p external && \
-    git clone --depth 1 https://github.com/CrowCpp/Crow.git external/crow && \
-    git clone --depth 1 https://github.com/Thalhammer/jwt-cpp.git external/jwt-cpp
+# Copy source code
+COPY . .
 
-COPY src/ src/
-COPY CMakeLists.txt .
-
-RUN mkdir -p build && \
-    cd build && \
+# Build the application
+RUN mkdir -p build && cd build && \
     cmake .. && \
-    make -j$(nproc)
+    make -j$(nproc) && \
+    make install
 
+# Create runtime image
+FROM ubuntu:22.04
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    libboost-system1.74.0 \
+    libboost-thread1.74.0 \
+    libpq5 \
+    libpqxx-6.4 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the built executable
+COPY --from=builder /usr/local/bin/mobile_dashboard_backend /usr/local/bin/
+
+# Expose port
 EXPOSE 8080
 
-ENV DB_CONNECTION_STRING=""
-ENV JWT_SECRET="" 
-ENV PORT=8080
-
-CMD ["./build/mobile_server"]
+# Run the server
+CMD ["mobile_dashboard_backend"]
