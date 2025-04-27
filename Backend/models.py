@@ -4,7 +4,6 @@ from django.utils import timezone
 
 
 class Department(models.Model):
-    """Department model for organizational structure"""
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -15,7 +14,6 @@ class Department(models.Model):
 
 
 class CustomUser(AbstractUser):
-    """Extended User model for authentication"""
     ROLE_CHOICES = (
         ('admin', 'Administrator'),
         ('manager', 'Manager'),
@@ -29,7 +27,6 @@ class CustomUser(AbstractUser):
 
 
 class Employee(models.Model):
-    """Employee model for detailed employee information"""
     GENDER_CHOICES = (
         ('M', 'Male'),
         ('F', 'Female'),
