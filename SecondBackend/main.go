@@ -105,6 +105,124 @@ func listTables(c *gin.Context) {
 	}
 }
 
+func getColumnNames(c *gin.Context) {
+	// Get the table name from the URL parameter
+	tableName := c.Param("tableName")
+
+	// Query to get column names from the 'information_schema.columns'
+	query := `
+		SELECT column_name
+		FROM information_schema.columns
+		WHERE table_name = $1
+	`
+
+	rows, err := db.Query(query, tableName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer rows.Close()
+
+	var columns []string
+	for rows.Next() {
+		var columnName string
+		err := rows.Scan(&columnName)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		columns = append(columns, columnName)
+	}
+
+	if err := rows.Err(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"columns": columns})
+}
+
+// Function to list all rows from a table using dynamic column names
+func listTableContents(c *gin.Context) {
+	// Get the table name from the URL parameter
+	tableName := c.Param("tableName")
+
+	// Get the column names dynamically
+	columns, err := getColumnNamesFromDb(tableName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Create a dynamic query with the column names
+	query := fmt.Sprintf("SELECT * FROM %s", tableName)
+
+	rows, err := db.Query(query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer rows.Close()
+
+	// Dynamically create placeholders for the row data
+	args := make([]interface{}, len(columns))
+	values := make([]interface{}, len(columns))
+	for i := range values {
+		values[i] = &args[i]
+	}
+
+	var results []map[string]interface{}
+	// Iterate through the rows
+	for rows.Next() {
+		err := rows.Scan(values...)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		rowData := make(map[string]interface{})
+		for i, column := range columns {
+			rowData[column] = args[i]
+		}
+		results = append(results, rowData)
+	}
+
+	if err := rows.Err(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"rows": results})
+}
+
+// Helper function to get column names from the database
+func getColumnNamesFromDb(tableName string) ([]string, error) {
+	// Query to get column names from the 'information_schema.columns'
+	query := `
+		SELECT column_name
+		FROM information_schema.columns
+		WHERE table_name = $1
+	`
+
+	rows, err := db.Query(query, tableName)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var columns []string
+	for rows.Next() {
+		var columnName string
+		err := rows.Scan(&columnName)
+		if err != nil {
+			return nil, err
+		}
+		columns = append(columns, columnName)
+	}
+
+	return columns, rows.Err()
+}
+
 func main() {
 	r := gin.Default()
 
@@ -124,6 +242,11 @@ func main() {
 	r.GET("/profile", getEmployeeProfile) // Get profile for logged-in user
 
 	r.GET("/db", listTables)
+
+	r.GET("/list-columns/:tableName", getColumnNames)
+
+	// Route to get all rows for a given table
+	r.GET("/list-table/:tableName", listTableContents)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080" // fallback for local dev
