@@ -7,6 +7,7 @@ function ManagerDashboard({ user }) {
   const [departmentEmployees, setDepartmentEmployees] = useState([]);
   const [attendanceHistory, setAttendanceHistory] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+
   const [taskForm, setTaskForm] = useState({
     assigned_to: '',
     title: '',
@@ -15,6 +16,13 @@ function ManagerDashboard({ user }) {
   });
   const [taskList, setTaskList] = useState([]);
 
+  const [requestForm, setRequestForm] = useState({
+    name: '',
+    description: '',
+    date: ''
+  });
+  const [requestList, setRequestList] = useState([]);
+
   const token = localStorage.getItem('accessToken');
   const config = { headers: { Authorization: `Bearer ${token}` } };
 
@@ -22,6 +30,12 @@ function ManagerDashboard({ user }) {
     axios.get(`${process.env.REACT_APP_API_URL}/api/tasks/`, config)
       .then(res => setTaskList(res.data))
       .catch(err => console.error('Fetching tasks failed', err));
+  };
+
+  const fetchRequests = () => {
+    axios.get(`${process.env.REACT_APP_API_URL}/api/requests/manager/`, config)
+      .then(res => setRequestList(res.data))
+      .catch(err => console.error('Fetching requests failed', err));
   };
 
   const handleAssignTask = (e) => {
@@ -38,8 +52,22 @@ function ManagerDashboard({ user }) {
       .catch(err => console.error('Error assigning task', err));
   };
 
-  const handleReviewTask = (taskId, action, rejection_comment = '') => {
-    axios.post(`${process.env.REACT_APP_API_URL}/api/tasks/${taskId}/review/`, { action, rejection_comment }, config)
+  const handleSubmitRequest = (e) => {
+    e.preventDefault();
+    const payload = {
+      ...requestForm,
+      submitted_by: employeeProfile.id
+    };
+    axios.post(`${process.env.REACT_APP_API_URL}/api/requests/manager/`, payload, config)
+      .then(() => {
+        fetchRequests();
+        setRequestForm({ name: '', description: '', date: '' });
+      })
+      .catch(err => console.error('Error submitting request', err));
+  };
+
+  const handleReviewTask = (taskId, action, comment = '') => {
+    axios.post(`${process.env.REACT_APP_API_URL}/api/tasks/${taskId}/review/`, { action, comment }, config)
       .then(() => {
         fetchTasks();
         alert(`Task ${action === 'accept' ? 'accepted' : 'rejected'}.`);
@@ -50,19 +78,25 @@ function ManagerDashboard({ user }) {
       });
   };
 
-  const handleDeleteTask = (taskId) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
-      axios.delete(`${process.env.REACT_APP_API_URL}/api/tasks/${taskId}/`, config)
-        .then(() => {
-          fetchTasks();
-          alert('Task deleted.');
-        })
-        .catch(err => {
-          console.error('Error deleting task:', err);
-          alert('Failed to delete task.');
-        });
+  useEffect(() => {
+    if (employeeProfile?.id) {
+      fetchTasks();
+      fetchRequests();
     }
-  };
+  }, [employeeProfile]);
+
+  useEffect(() => {
+    axios.get(`${process.env.REACT_APP_API_URL}/api/my-profile/`, config)
+      .then(res => {
+        setEmployeeProfile(res.data);
+        if (res.data.department) {
+          axios.get(`${process.env.REACT_APP_API_URL}/api/departments/${res.data.department}/employees/`, config)
+            .then(empRes => setDepartmentEmployees(empRes.data))
+            .catch(err => console.error('Error fetching department employees:', err));
+        }
+      })
+      .catch(err => console.error('Error fetching profile:', err));
+  }, []);
 
   const markAttendance = (employeeId, action) => {
     axios.post(`${process.env.REACT_APP_API_URL}/api/attendance/mark/`, {
@@ -96,35 +130,27 @@ function ManagerDashboard({ user }) {
       });
   };
 
-  useEffect(() => {
-    if (employeeProfile?.id) {
-      fetchTasks();
-    }
-  }, [employeeProfile]);
-
-  useEffect(() => {
-    axios.get(`${process.env.REACT_APP_API_URL}/api/my-profile/`, config)
-      .then(res => {
-        setEmployeeProfile(res.data);
-        if (res.data.department) {
-          axios.get(`${process.env.REACT_APP_API_URL}/api/departments/${res.data.department}/employees/`, config)
-            .then(empRes => setDepartmentEmployees(empRes.data))
-            .catch(err => console.error('Error fetching department employees:', err));
-        }
-      })
-      .catch(err => console.error('Error fetching profile:', err));
-  }, []);
-
   return (
     <div className="dashboard employee-dashboard">
       <h2>Manager Dashboard</h2>
       <p>Welcome, {user.username}!</p>
 
       <div className="tabs" style={{ marginTop: '1rem' }}>
-        <button className={activeTab === 'profile' ? 'active' : ''} onClick={() => setActiveTab('profile')}>My Profile</button>
-        <button className={activeTab === 'department' ? 'active' : ''} onClick={() => setActiveTab('department')}>My Department</button>
-        <button className={activeTab === 'attendance' ? 'active' : ''} onClick={() => setActiveTab('attendance')}>Attendance History</button>
-        <button className={activeTab === 'tasks' ? 'active' : ''} onClick={() => setActiveTab('tasks')}>Tasks</button>
+        <button className={activeTab === 'profile' ? 'active' : ''} onClick={() => setActiveTab('profile')}>
+          My Profile
+        </button>
+        <button className={activeTab === 'department' ? 'active' : ''} onClick={() => setActiveTab('department')}>
+          My Department
+        </button>
+        <button className={activeTab === 'attendance' ? 'active' : ''} onClick={() => setActiveTab('attendance')}>
+          Attendance History
+        </button>
+        <button className={activeTab === 'tasks' ? 'active' : ''} onClick={() => setActiveTab('tasks')}>
+          Tasks
+        </button>
+        <button className={activeTab === 'requests' ? 'active' : ''} onClick={() => setActiveTab('requests')}>
+          Requests
+        </button>
       </div>
 
       <div className="dashboard-content" style={{ marginTop: '1rem' }}>
@@ -165,7 +191,6 @@ function ManagerDashboard({ user }) {
                 </tbody>
               </table>
             )}
-
             <h4 style={{ marginTop: '2rem' }}>Mark Attendance</h4>
             <table className="employee-table">
               <thead>
@@ -193,13 +218,10 @@ function ManagerDashboard({ user }) {
         {activeTab === 'attendance' && (
           <div>
             <h3>Attendance History (Last 30 Days)</h3>
-
             <select onChange={(e) => fetchAttendanceHistory(e.target.value)} defaultValue="">
               <option value="" disabled>Select an Employee</option>
               {departmentEmployees.map(emp => (
-                <option key={emp.id} value={emp.id}>
-                  {emp.first_name} {emp.last_name}
-                </option>
+                <option key={emp.id} value={emp.id}>{emp.first_name} {emp.last_name}</option>
               ))}
             </select>
 
@@ -231,7 +253,6 @@ function ManagerDashboard({ user }) {
         {activeTab === 'tasks' && (
           <div>
             <h3>Assign Tasks</h3>
-
             <form onSubmit={handleAssignTask} style={{ marginBottom: '1.5rem' }}>
               <div className="form-row">
                 <select required value={taskForm.assigned_to} onChange={e => setTaskForm({...taskForm, assigned_to: e.target.value})}>
@@ -240,19 +261,15 @@ function ManagerDashboard({ user }) {
                     <option key={emp.id} value={emp.id}>{emp.first_name} {emp.last_name}</option>
                   ))}
                 </select>
-
                 <input type="text" placeholder="Task title" required
                   value={taskForm.title}
                   onChange={e => setTaskForm({...taskForm, title: e.target.value})} />
-
                 <input type="date" value={taskForm.deadline}
                   onChange={e => setTaskForm({...taskForm, deadline: e.target.value})} />
               </div>
-
               <textarea placeholder="Task description" rows="3"
                 value={taskForm.description}
                 onChange={e => setTaskForm({...taskForm, description: e.target.value})} />
-
               <button type="submit">Assign Task</button>
             </form>
 
@@ -264,7 +281,6 @@ function ManagerDashboard({ user }) {
                   <th>Assigned To</th>
                   <th>Status</th>
                   <th>Deadline</th>
-                  <th>Comment</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -275,15 +291,14 @@ function ManagerDashboard({ user }) {
                     <td>{task.assigned_to_name}</td>
                     <td>{task.status}</td>
                     <td>{task.deadline}</td>
-                    <td>{task.rejection_comment || '-'}</td>
                     <td>
                       {task.status === 'submitted' ? (
                         <div>
                           <button onClick={() => handleReviewTask(task.id, 'accept')}>Accept</button>
                           <button onClick={() => {
-                            const rejection_comment = prompt('Reason for rejection:');
-                            if (rejection_comment !== null) {
-                              handleReviewTask(task.id, 'reject', rejection_comment);
+                            const comment = prompt('Reason for rejection:');
+                            if (comment !== null) {
+                              handleReviewTask(task.id, 'reject', comment);
                             }
                           }}>
                             Reject
@@ -292,11 +307,58 @@ function ManagerDashboard({ user }) {
                       ) : (
                         <span>-</span>
                       )}
-                      <br />
-                      <button onClick={() => handleDeleteTask(task.id)} style={{ marginTop: '5px', backgroundColor: 'red', color: 'white' }}>
-                        Delete
-                      </button>
                     </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {activeTab === 'requests' && (
+          <div>
+            <h3>Submit a Request to Admin</h3>
+            <form onSubmit={handleSubmitRequest} style={{ marginBottom: '1.5rem' }}>
+              <input
+                type="text"
+                placeholder="Request Name"
+                required
+                value={requestForm.name}
+                onChange={e => setRequestForm({...requestForm, name: e.target.value})}
+              />
+              <input
+                type="date"
+                required
+                value={requestForm.date}
+                onChange={e => setRequestForm({...requestForm, date: e.target.value})}
+              />
+              <textarea
+                placeholder="Request Description"
+                rows="3"
+                required
+                value={requestForm.description}
+                onChange={e => setRequestForm({...requestForm, description: e.target.value})}
+              />
+              <button type="submit">Submit Request</button>
+            </form>
+
+            <h4>My Requests</h4>
+            <table className="employee-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Comment</th>
+                </tr>
+              </thead>
+              <tbody>
+                {requestList.map(req => (
+                  <tr key={req.id}>
+                    <td>{req.name}</td>
+                    <td>{req.date}</td>
+                    <td>{req.status}</td>
+                    <td>{req.comment || '-'}</td>
                   </tr>
                 ))}
               </tbody>
