@@ -1,21 +1,22 @@
-// main.go
 package main
 
 import (
-    "github.com/gin-gonic/gin"
-    "os"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-    r := gin.Default()
-    r.GET("/", func(c *gin.Context) {
-        c.String(200, "Hello from Go + Gin + Render!")
-    })
+	r := gin.Default()
 
-    port := os.Getenv("PORT")
-    if port == "" {
-        port = "8080" // fallback for local dev
-    }
+	r.GET("/profile", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"first_name": "John",
+			"last_name":  "Doe",
+			"email":      "john.doe@example.com",
+			"position":   "Mobile Developer",
+		})
+	})
 
-    r.Run(":" + port)
+	r.Run()
 }
