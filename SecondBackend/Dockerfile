@@ -1,50 +1,50 @@
-FROM ubuntu:22.04 as builder
+FROM ubuntu:22.04
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
-    git \
     libboost-all-dev \
-    libpq-dev \
     libpqxx-dev \
-    nlohmann-json3-dev \
+    libssl-dev \
+    git \
+    pkg-config \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Crow
-RUN curl -sSL https://github.com/CrowCpp/Crow/releases/download/v1.0+5/crow-v1.0+5.deb -o crow.deb \
-    && dpkg -i crow.deb \
-    && rm crow.deb
+# Install nlohmann/json (JSON library)
+RUN curl -L https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp -o /usr/include/nlohmann/json.hpp
 
-# Create working directory
+# Install jwt-cpp
+WORKDIR /tmp
+RUN git clone https://github.com/Thalhammer/jwt-cpp.git \
+    && cd jwt-cpp \
+    && mkdir build && cd build \
+    && cmake .. \
+    && make install
+
+# Install Crow
+WORKDIR /tmp
+RUN git clone https://github.com/CrowCpp/Crow.git \
+    && cd Crow \
+    && mkdir build && cd build \
+    && cmake .. -DCROW_BUILD_EXAMPLES=OFF -DCROW_BUILD_TESTS=OFF \
+    && make install
+
+# Create app directory
 WORKDIR /app
 
-# Copy source code
+# Copy source files
 COPY . .
 
-# Build the application
-RUN mkdir -p build && cd build && \
-    cmake .. && \
-    make -j$(nproc) && \
-    make install
-
-# Create runtime image
-FROM ubuntu:22.04
-
-# Install runtime dependencies
-RUN apt-get update && apt-get install -y \
-    libboost-system1.74.0 \
-    libboost-thread1.74.0 \
-    libpq5 \
-    libpqxx-6.4 \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy the built executable
-COPY --from=builder /usr/local/bin/mobile_dashboard_backend /usr/local/bin/
+# Build the app
+RUN mkdir -p build \
+    && cd build \
+    && cmake .. \
+    && make
 
 # Expose port
 EXPOSE 8080
 
-# Run the server
-CMD ["mobile_dashboard_backend"]
+# Start the app
+CMD ["/app/build/mobile_server"]

@@ -1,6 +1,0 @@
-.git
-build/
-.dockerignore
-*.o
-*.a
-*.so
