@@ -9,9 +9,16 @@ function MobileDashboard({ user }) {
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_MOBILE_API_URL}/profile`, config)
-      .then(res => setProfile(res.data))
-      .catch(err => console.error('Error fetching mobile profile:', err));
+      .then(res => {
+        console.log('Profile data:', res.data);  // Log the response
+        setProfile(res.data);
+      })
+      .catch(err => {
+        console.error('Error fetching mobile profile:', err);
+        setError('Failed to load profile.');
+      });
   }, []);
+  
 
   return (
     <div className="dashboard mobile-dashboard">

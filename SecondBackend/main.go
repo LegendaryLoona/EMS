@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt" // This is necessary for logging
 	"net/http"
 
 	"github.com/gin-contrib/cors"
@@ -10,18 +11,25 @@ import (
 func main() {
 	r := gin.Default()
 
-	// Add CORS config
+	// CORS Middleware
 	r.Use(cors.Default())
 
 	r.GET("/profile", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
+		// Sample profile data
+		profile := gin.H{
 			"first_name": "John",
 			"last_name":  "Doe",
 			"email":      "john@example.com",
 			"position":   "Mobile Developer",
-		})
+		}
+
+		// Log the profile data being returned
+		fmt.Println("Returning profile:", profile)
+
+		// Respond with JSON
+		c.JSON(http.StatusOK, profile)
 	})
 
-	port := "8080" // or get from environment on Render
-	r.Run(":" + port)
+	port := "8080"    // Set the desired port
+	r.Run(":" + port) // Run the server
 }
