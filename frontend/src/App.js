@@ -3,24 +3,30 @@ import Login from './components/Login';
 import AdminDashboard from './components/AdminDashboard';
 import EmployeeDashboard from './components/EmployeeDashboard';
 import ManagerDashboard from './components/ManagerDashboard';
+import MobileDashboard from './components/MobileDashboard';
 import './App.css';
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  function isMobileDevice() {
+    return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  }
 
   useEffect(() => {
-    // Check if user is logged in
     const token = localStorage.getItem('accessToken');
     const userData = localStorage.getItem('user');
-    
+    setIsMobile(isMobileDevice()); // detect on app load
+
     if (token && userData) {
       const parsedUser = JSON.parse(userData);
       console.log("Retrieved user from localStorage:", parsedUser);
       console.log("User role:", parsedUser.role);
       setUser(parsedUser);
     }
-    
+
     setLoading(false);
   }, []);
 
@@ -28,11 +34,11 @@ function App() {
     console.log("Login successful, received data:", userData);
     console.log("User role from login:", userData.user.role);
     
-    // Make sure we're setting the full user object including role
     setUser(userData.user);
     localStorage.setItem('user', JSON.stringify(userData.user));
     localStorage.setItem('accessToken', userData.access);
     localStorage.setItem('refreshToken', userData.refresh);
+    setIsMobile(isMobileDevice()); // detect again on login just in case
   };
 
   const handleLogout = () => {
@@ -64,21 +70,18 @@ function App() {
       <main>
         {!user ? (
           <Login onLogin={handleLogin} />
+        ) : isMobile && (user.role === 'admin' || user.role === 'manager') ? (
+          <div style={{ color: 'red', marginTop: '2rem' }}>
+            {user.role} access is only available on PC. Please use a computer.
+          </div>
+        ) : isMobile && user.role === 'employee' ? (
+          <MobileDashboard user={user} />
         ) : user.role === 'admin' ? (
-          <>
-            <div style={{color: 'red'}}>Role is: {user.role}</div>
-            <AdminDashboard user={user} />
-          </>
+          <AdminDashboard user={user} />
         ) : user.role === 'manager' ? (
-          <>
-            <div style={{color: 'red'}}>Role is: {user.role}</div>
-            <ManagerDashboard user={user} />
-          </>
+          <ManagerDashboard user={user} />
         ) : (
-          <>
-            <div style={{color: 'red'}}>Role is: {user.role}</div>
-            <EmployeeDashboard user={user} />
-          </>
+          <EmployeeDashboard user={user} />
         )}
       </main>
     </div>

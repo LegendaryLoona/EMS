@@ -1,4 +1,3 @@
-// components/Login.js with console logs
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -21,7 +20,6 @@ function Login({ onLogin }) {
       
       console.log("Login API response:", response.data);
       
-      // Check if the role is included in the response
       if (!response.data.user || !response.data.user.role) {
         console.error("Missing user role in response:", response.data);
       }
