@@ -1,9 +1,11 @@
-// components/AdminDashboard.js
 import React, { useState } from 'react';
 import UserManagement from './Admin_tabs/UserManagement';
 import EmployeeInfo from './Admin_tabs/EmployeeManagement';
-import DocumentsTab from './Admin_tabs/FileManagement';
 import DepartmentManagement from './Admin_tabs/DepartManagement';
+import RequestsManagement from './Admin_tabs/RequestsManagement';
+
+
+
 
 function AdminDashboard({ user }) {
   const [activeTab, setActiveTab] = useState('users');
@@ -15,7 +17,7 @@ function AdminDashboard({ user }) {
       case 'employees':
         return <EmployeeInfo />;
       case 'documents':
-        return <DocumentsTab />;
+        return <RequestsManagement  />;
       case 'departments':
         return <DepartmentManagement/>
       default:

@@ -91,3 +91,21 @@ class Task(models.Model):
 
     def __str__(self):
         return f"{self.title} → {self.assigned_to.first_name} ({self.status})"
+
+
+class Request(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('declined', 'Declined'),
+    ]
+
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    date_submitted = models.DateTimeField(auto_now_add=True)
+    submitted_by = models.ForeignKey('employees.Employee', on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    admin_comment = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.status})"

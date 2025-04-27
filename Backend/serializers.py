@@ -1,6 +1,6 @@
 # serializers.py
 from rest_framework import serializers
-from .models import Department, CustomUser, Employee, Attendance, Task
+from .models import Department, CustomUser, Employee, Attendance, Task, Request
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 
@@ -95,3 +95,15 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = '__all__'
+
+
+class RequestSerializer(serializers.ModelSerializer):
+    submitted_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Request
+        fields = ['id', 'name', 'description', 'date_submitted', 'submitted_by', 'submitted_by_name', 'status', 'admin_comment']
+        read_only_fields = ['id', 'date_submitted', 'status', 'admin_comment']
+
+    def get_submitted_by_name(self, obj):
+        return f"{obj.submitted_by.first_name} {obj.submitted_by.last_name}"

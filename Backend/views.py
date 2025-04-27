@@ -1,18 +1,14 @@
-# views.py
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions, status, generics
 from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
-from .models import CustomUser, Department, Employee, Task, Attendance
-from .serializers import DepartmentSerializer, CustomUserSerializer, EmployeeSerializer, AttendanceSerializer, TaskSerializer
+from .models import CustomUser, Department, Employee, Task, Attendance, Request
+from .serializers import DepartmentSerializer, CustomUserSerializer, EmployeeSerializer, AttendanceSerializer, TaskSerializer, RequestSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework import generics, permissions
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from django.utils import timezone
-from datetime import timedelta, date
+from datetime import timedelta
 
 
 
@@ -236,3 +232,42 @@ def review_task(request, task_id):
 
     except Task.DoesNotExist:
         return Response({'error': 'Task not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+
+class RequestListCreateView(generics.ListCreateAPIView):
+    serializer_class = RequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Request.objects.filter(submitted_by=self.request.user.employee)
+
+    def perform_create(self, serializer):
+        serializer.save(submitted_by=self.request.user.employee)
+
+# Admin: View all requests
+class RequestAdminListView(generics.ListAPIView):
+    queryset = Request.objects.all()
+    serializer_class = RequestSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+# Admin: Update a request (complete or decline)
+class RequestReviewView(generics.UpdateAPIView):
+    queryset = Request.objects.all()
+    serializer_class = RequestSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    def patch(self, request, *args, **kwargs):
+        instance = self.get_object()
+        action = request.data.get('action')
+        comment = request.data.get('comment', '')
+
+        if action == 'complete':
+            instance.status = 'completed'
+        elif action == 'decline':
+            instance.status = 'declined'
+        else:
+            return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
+
+        instance.admin_comment = comment
+        instance.save()
+        return Response(RequestSerializer(instance).data)
