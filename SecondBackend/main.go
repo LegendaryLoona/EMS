@@ -65,7 +65,7 @@ func getEmployeeProfile(c *gin.Context) {
 	// Query to get employee details
 	query := `
     SELECT employee_id, first_name, last_name, gender, date_of_birth, address, hire_date, 
-           manager_id, position, salary, department, is_active
+           manager_id, position, salary, department_id, is_active
     FROM "Backend_employee"
     WHERE user_id = $1
     `
@@ -104,8 +104,24 @@ func getEmployeeProfile(c *gin.Context) {
 		// Set the manager's name in the employee struct
 		employee.Manager = &managerName
 	}
+	// if employee.Department != nil {
+	// 	// Query to get the manager's name (based on manager_id)
+	// 	var departmentName string
+	// 	departmentQuery := `
+	// 		SELECT name
+	// 		FROM "Backend_department"
+	// 		WHERE employee_id = $1
+	// 	`
 
-	// Return the employee profile with the manager's name
+	// 	err = db.QueryRow(managerQuery, *employee.Manager).Scan(&managerName)
+	// 	if err != nil {
+	// 		log.Printf("Error fetching manager data: %v", err)
+	// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching manager data"})
+	// 		return
+	// 	}
+	// 	// Set the manager's name in the employee struct
+	// 	employee.Manager = &managerName
+	// }
 	c.JSON(http.StatusOK, employee)
 }
 
