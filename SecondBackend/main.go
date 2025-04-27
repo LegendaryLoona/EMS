@@ -66,7 +66,7 @@ func getEmployeeProfile(c *gin.Context) {
 		SELECT employee_id, first_name, last_name, gender, date_of_birth, address, hire_date, 
 		       manager, position, salary, department, is_active
 		FROM Employee
-		WHERE user_id = $1
+		WHERE employee_id = $1
 	`
 	row := db.QueryRow(query, userID)
 
@@ -84,6 +84,25 @@ func getEmployeeProfile(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, employee)
+}
+
+func listTables(c *gin.Context) {
+	query := "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
+
+	rows, err := db.Query(query)
+	if err != nil {
+		log.Fatal("Error executing query:", err)
+	}
+	defer rows.Close()
+
+	var tableName string
+	fmt.Println("Tables in the database:")
+	for rows.Next() {
+		if err := rows.Scan(&tableName); err != nil {
+			log.Fatal("Error scanning rows:", err)
+		}
+		fmt.Println(tableName)
+	}
 }
 
 func main() {
@@ -104,6 +123,7 @@ func main() {
 
 	r.GET("/profile", getEmployeeProfile) // Get profile for logged-in user
 
+	r.GET("/db", listTables)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080" // fallback for local dev
