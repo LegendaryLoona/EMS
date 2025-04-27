@@ -63,11 +63,11 @@ func getEmployeeProfile(c *gin.Context) {
 	var employee EmployeeProfile
 
 	query := `
-		SELECT employee_id, first_name, last_name, gender, date_of_birth, address, hire_date, 
-		       manager, position, salary, department, is_active
-		FROM Backend_employee
-		WHERE employee_id = $1
-	`
+    SELECT employee_id, first_name, last_name, gender, date_of_birth, address, hire_date, 
+           manager, position, salary, department, is_active
+    FROM "Backend_employee"
+    WHERE user_id = $1
+    `
 	row := db.QueryRow(query, userID)
 
 	err := row.Scan(&employee.EmployeeID, &employee.FirstName, &employee.LastName, &employee.Gender,
