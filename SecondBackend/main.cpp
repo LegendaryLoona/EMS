@@ -7,6 +7,14 @@
 
 using json = nlohmann::json;
 
+// Simple health check route for monitoring
+void addHealthRoute(crow::SimpleApp& app) {
+    CROW_ROUTE(app, "/health")
+    ([]() {
+        return "OK";
+    });
+}
+
 // Database connection helper
 class Database {
 private:
@@ -68,22 +76,35 @@ int main() {
     // Initialize database
     Database db(db_url);
     
-    // Initialize Crow app with JWT middleware
-    crow::App<crow::CORSHandler, JwtMiddleware> app(JwtMiddleware(jwt_secret));
+    // Initialize Crow app 
+    crow::SimpleApp app;
     
-    // Configure CORS
-    auto& cors = app.get_middleware<crow::CORSHandler>();
-    cors
-        .global()
-        .headers("Content-Type", "Authorization")
-        .methods("GET", "POST", "PUT", "DELETE")
-        .prefix("/")
-        .origin("*");
+    // Add health check endpoint
+    addHealthRoute(app);
     
     // Profile endpoint
     CROW_ROUTE(app, "/profile")
     .methods("GET"_method)
-    ([&db](const crow::request& req, crow::response& res, JwtMiddleware::context& ctx) {
+    ([&db, &jwt_secret](const crow::request& req) {
+        auto auth_header = req.get_header_value("Authorization");
+        if (auth_header.empty() || auth_header.substr(0, 7) != "Bearer ") {
+            return crow::response(401);
+        }
+        
+        std::string token = auth_header.substr(7);
+        int user_id;
+        
+        try {
+            auto decoded = jwt::decode(token);
+            auto verifier = jwt::verify()
+                .allow_algorithm(jwt::algorithm::hs256{jwt_secret});
+            verifier.verify(decoded);
+            
+            user_id = decoded.get_payload_claim("user_id").as_int();
+        } catch (std::exception& e) {
+            return crow::response(401);
+        }
+        
         try {
             auto conn = db.connect();
             pqxx::work txn(conn);
@@ -98,13 +119,11 @@ int main() {
                 "LEFT JOIN employees m ON d.manager_id = m.id "
                 "LEFT JOIN users u ON m.user_id = u.id "
                 "WHERE e.user_id = $1",
-                ctx.user_id
+                user_id
             );
             
             if (result.empty()) {
-                res.code = 404;
-                res.end();
-                return;
+                return crow::response(404);
             }
             
             json profile;
@@ -117,20 +136,40 @@ int main() {
             profile["manager_name"] = result[0]["manager_name"].as<std::string>();
             profile["manager_email"] = result[0]["manager_email"].as<std::string>();
             
+            crow::response res;
             res.body = profile.dump();
             res.set_header("Content-Type", "application/json");
-            res.end();
+            return res;
         } catch (std::exception& e) {
-            res.code = 500;
+            crow::response res(500);
             res.body = json{{"error", e.what()}}.dump();
-            res.end();
+            return res;
         }
     });
     
     // Attendance endpoint
     CROW_ROUTE(app, "/attendance")
     .methods("GET"_method)
-    ([&db](const crow::request& req, crow::response& res, JwtMiddleware::context& ctx) {
+    ([&db, &jwt_secret](const crow::request& req) {
+        auto auth_header = req.get_header_value("Authorization");
+        if (auth_header.empty() || auth_header.substr(0, 7) != "Bearer ") {
+            return crow::response(401);
+        }
+        
+        std::string token = auth_header.substr(7);
+        int user_id;
+        
+        try {
+            auto decoded = jwt::decode(token);
+            auto verifier = jwt::verify()
+                .allow_algorithm(jwt::algorithm::hs256{jwt_secret});
+            verifier.verify(decoded);
+            
+            user_id = decoded.get_payload_claim("user_id").as_int();
+        } catch (std::exception& e) {
+            return crow::response(401);
+        }
+        
         try {
             auto conn = db.connect();
             pqxx::work txn(conn);
@@ -138,13 +177,11 @@ int main() {
             // First get the employee ID for this user
             pqxx::result emp_result = txn.exec_params(
                 "SELECT id FROM employees WHERE user_id = $1",
-                ctx.user_id
+                user_id
             );
             
             if (emp_result.empty()) {
-                res.code = 404;
-                res.end();
-                return;
+                return crow::response(404);
             }
             
             int employee_id = emp_result[0]["id"].as<int>();
@@ -173,20 +210,40 @@ int main() {
                 attendance.push_back(record);
             }
             
+            crow::response res;
             res.body = attendance.dump();
             res.set_header("Content-Type", "application/json");
-            res.end();
+            return res;
         } catch (std::exception& e) {
-            res.code = 500;
+            crow::response res(500);
             res.body = json{{"error", e.what()}}.dump();
-            res.end();
+            return res;
         }
     });
     
     // Tasks endpoint
     CROW_ROUTE(app, "/tasks")
     .methods("GET"_method)
-    ([&db](const crow::request& req, crow::response& res, JwtMiddleware::context& ctx) {
+    ([&db, &jwt_secret](const crow::request& req) {
+        auto auth_header = req.get_header_value("Authorization");
+        if (auth_header.empty() || auth_header.substr(0, 7) != "Bearer ") {
+            return crow::response(401);
+        }
+        
+        std::string token = auth_header.substr(7);
+        int user_id;
+        
+        try {
+            auto decoded = jwt::decode(token);
+            auto verifier = jwt::verify()
+                .allow_algorithm(jwt::algorithm::hs256{jwt_secret});
+            verifier.verify(decoded);
+            
+            user_id = decoded.get_payload_claim("user_id").as_int();
+        } catch (std::exception& e) {
+            return crow::response(401);
+        }
+        
         try {
             auto conn = db.connect();
             pqxx::work txn(conn);
@@ -194,13 +251,11 @@ int main() {
             // First get the employee ID for this user
             pqxx::result emp_result = txn.exec_params(
                 "SELECT id FROM employees WHERE user_id = $1",
-                ctx.user_id
+                user_id
             );
             
             if (emp_result.empty()) {
-                res.code = 404;
-                res.end();
-                return;
+                return crow::response(404);
             }
             
             int employee_id = emp_result[0]["id"].as<int>();
@@ -228,20 +283,40 @@ int main() {
                 tasks.push_back(task);
             }
             
+            crow::response res;
             res.body = tasks.dump();
             res.set_header("Content-Type", "application/json");
-            res.end();
+            return res;
         } catch (std::exception& e) {
-            res.code = 500;
+            crow::response res(500);
             res.body = json{{"error", e.what()}}.dump();
-            res.end();
+            return res;
         }
     });
     
     // Submit task endpoint
     CROW_ROUTE(app, "/tasks/<int>/submit")
     .methods("POST"_method)
-    ([&db](const crow::request& req, crow::response& res, JwtMiddleware::context& ctx, int task_id) {
+    ([&db, &jwt_secret](const crow::request& req, int task_id) {
+        auto auth_header = req.get_header_value("Authorization");
+        if (auth_header.empty() || auth_header.substr(0, 7) != "Bearer ") {
+            return crow::response(401);
+        }
+        
+        std::string token = auth_header.substr(7);
+        int user_id;
+        
+        try {
+            auto decoded = jwt::decode(token);
+            auto verifier = jwt::verify()
+                .allow_algorithm(jwt::algorithm::hs256{jwt_secret});
+            verifier.verify(decoded);
+            
+            user_id = decoded.get_payload_claim("user_id").as_int();
+        } catch (std::exception& e) {
+            return crow::response(401);
+        }
+        
         try {
             auto conn = db.connect();
             pqxx::work txn(conn);
@@ -249,13 +324,11 @@ int main() {
             // Check if task belongs to this employee
             pqxx::result emp_result = txn.exec_params(
                 "SELECT e.id FROM employees e WHERE e.user_id = $1",
-                ctx.user_id
+                user_id
             );
             
             if (emp_result.empty()) {
-                res.code = 404;
-                res.end();
-                return;
+                return crow::response(404);
             }
             
             int employee_id = emp_result[0]["id"].as<int>();
@@ -266,10 +339,9 @@ int main() {
             );
             
             if (task_result.empty()) {
-                res.code = 404;
+                crow::response res(404);
                 res.body = json{{"error", "Task not found or not assigned to you"}}.dump();
-                res.end();
-                return;
+                return res;
             }
             
             // Update task status
@@ -280,14 +352,21 @@ int main() {
             
             txn.commit();
             
-            res.code = 200;
+            crow::response res(200);
             res.body = json{{"message", "Task submitted successfully"}}.dump();
-            res.end();
+            return res;
         } catch (std::exception& e) {
-            res.code = 500;
+            crow::response res(500);
             res.body = json{{"error", e.what()}}.dump();
-            res.end();
+            return res;
         }
+    });
+    
+    // Enable CORS
+    app.after_request([](const crow::request& req, crow::response& res) {
+        res.set_header("Access-Control-Allow-Origin", "*");
+        res.set_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+        res.set_header("Access-Control-Allow-Headers", "Content-Type, Authorization");
     });
     
     // Start the server
