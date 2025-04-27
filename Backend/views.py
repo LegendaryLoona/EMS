@@ -239,10 +239,10 @@ class RequestListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Request.objects.filter(submitted_by=self.request.user.employee)
+        return Request.objects.filter(submitted_by=self.request.user.employee_profile)
 
     def perform_create(self, serializer):
-        serializer.save(submitted_by=self.request.user.employee)
+        serializer.save(submitted_by=self.request.user.employee_profile)
 
 # Admin: View all requests
 class RequestAdminListView(generics.ListAPIView):
