@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install nlohmann/json (JSON library)
-RUN curl -L https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp -o /usr/include/nlohmann/json.hpp
+RUN mkdir -p /usr/include/nlohmann && \
+    curl -L https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp -o /usr/include/nlohmann/json.hpp
 
 # Install jwt-cpp
 WORKDIR /tmp
