@@ -36,15 +36,11 @@ function MobileDashboard({ user }) {
   const fetchTasks = () => {
     axios.get(`${process.env.REACT_APP_MOBILE_API_URL}/tasks?user_id=${user.id}`, config)
       .then(res => {
-        const employeeId = profile?.employee_id;
-        if (employeeId) {
-          const tasksForMe = res.data.filter(task => task.assigned_to === employeeId);
-          setMyTasks(tasksForMe);
-        }
+        setMyTasks(res.data);
       })
       .catch(err => console.error('Error fetching tasks:', err));
   };
-
+  
   const handleSubmitTask = (taskId) => {
     axios.post(`${process.env.REACT_APP_API_URL}/task_submit?task_id=${taskId}`, {}, config)
       .then(() => {
