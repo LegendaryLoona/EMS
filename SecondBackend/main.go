@@ -372,7 +372,7 @@ func main() {
 
 	r.GET("/tasks", fetchTasks)
 
-	r.GET("/task_submit", submitTask)
+	r.POST("/task_submit", submitTask)
 
 	port := os.Getenv("PORT")
 	if port == "" {
