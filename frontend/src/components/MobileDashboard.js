@@ -36,16 +36,16 @@ function MobileDashboard({ user }) {
   const fetchTasks = () => {
     axios.get(`${process.env.REACT_APP_MOBILE_API_URL}/tasks?user_id=${user.id}`, config)
       .then(res => {
-        setMyTasks(res.data);
+        setMyTasks(res.data); // No need to filter
       })
       .catch(err => console.error('Error fetching tasks:', err));
   };
-  
+
   const handleSubmitTask = (taskId) => {
     axios.post(`${process.env.REACT_APP_API_URL}/task_submit?task_id=${taskId}`, {}, config)
       .then(() => {
         alert('Task submitted!');
-        fetchTasks();
+        fetchTasks(); // refresh tasks after submission
       })
       .catch(err => {
         console.error('Error submitting task:', err);
@@ -54,14 +54,14 @@ function MobileDashboard({ user }) {
   };
 
   return (
-    <div className="dashboard mobile-dashboard">
+    <div className="dashboard mobile-dashboard" style={{ padding: '1rem' }}>
       <h2>Mobile Dashboard</h2>
       <p>Welcome, {user.username}!</p>
 
       {error && <p className="error">{error}</p>}
 
       {/* Tabs */}
-      <div className="tabs" style={{ marginTop: '1rem' }}>
+      <div className="tabs" style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
         <button className={activeTab === 'profile' ? 'active' : ''} onClick={() => setActiveTab('profile')}>
           Profile
         </button>
@@ -96,39 +96,41 @@ function MobileDashboard({ user }) {
             {myTasks.length === 0 ? (
               <p>No tasks assigned.</p>
             ) : (
-              <table className="employee-table">
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Status</th>
-                    <th>Description</th>
-                    <th>Deadline</th>
-                    <th>Comment</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {myTasks.map(task => (
-                    <tr key={task.id}>
-                      <td>{task.title}</td>
-                      <td>{task.status}</td>
-                      <td>{task.description}</td>
-                      <td>{task.rejection_comment}</td>
-                      <td>{task.deadline}</td>
-                      <td>
-                        {task.status === 'in_progress' && (
-                          <button onClick={() => handleSubmitTask(task.id)}>
-                            Submit
-                          </button>
-                        )}
-                        {(task.status === 'submitted' || task.status === 'completed') && (
-                          <span>-</span>
-                        )}
-                      </td>
+              <div style={{ overflowX: 'auto' }}>
+                <table className="employee-table" style={{ minWidth: '600px', width: '100%' }}>
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Status</th>
+                      <th>Description</th>
+                      <th>Deadline</th>
+                      <th>Comment</th>
+                      <th>Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {myTasks.map(task => (
+                      <tr key={task.id}>
+                        <td>{task.title}</td>
+                        <td>{task.status}</td>
+                        <td>{task.description}</td>
+                        <td>{task.deadline}</td>
+                        <td>{task.rejection_comment ? task.rejection_comment : '—'}</td>
+                        <td>
+                          {task.status === 'in_progress' && (
+                            <button onClick={() => handleSubmitTask(task.id)}>
+                              Submit
+                            </button>
+                          )}
+                          {(task.status === 'submitted' || task.status === 'completed') && (
+                            <span>-</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         )}

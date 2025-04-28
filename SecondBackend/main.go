@@ -314,12 +314,38 @@ func fetchTasks(c *gin.Context) {
 
 func submitTask(c *gin.Context) {
 	taskID := c.DefaultQuery("task_id", "")
-
 	if taskID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Task ID is required"})
 		return
 	}
 
+	// Update the task status to 'submitted'
+	query := `
+		UPDATE "Backend_tasks"
+		SET status = 'submitted', updated_at = NOW()
+		WHERE id = $1
+	`
+
+	result, err := db.Exec(query, taskID)
+	if err != nil {
+		log.Printf("Error updating task: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to submit task"})
+		return
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Printf("Error getting rows affected: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to confirm task submission"})
+		return
+	}
+
+	if rowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Task not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Task submitted successfully"})
 }
 
 func main() {
