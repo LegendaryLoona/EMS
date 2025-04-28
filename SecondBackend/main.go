@@ -322,7 +322,7 @@ func submitTask(c *gin.Context) {
 	// Update the task status to 'submitted'
 	query := `
 		UPDATE "Backend_tasks"
-		SET status = 'submitted', updated_at = NOW()
+		SET status = 'submitted'
 		WHERE id = $1
 	`
 
