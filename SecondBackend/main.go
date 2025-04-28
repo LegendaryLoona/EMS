@@ -245,6 +245,81 @@ func getColumnNamesFromDb(tableName string) ([]string, error) {
 	return columns, rows.Err()
 }
 
+func fetchTasks(c *gin.Context) {
+	userID := c.DefaultQuery("user_id", "")
+
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
+		return
+	}
+	var employeeID int
+	err := db.QueryRow(`SELECT id FROM "Backend_employee" WHERE user_id = $1`, userID).Scan(&employeeID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Employee not found for user"})
+		} else {
+			log.Printf("Error fetching employee ID: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		}
+		return
+	}
+	rows, err := db.Query(`
+		SELECT id, created_at, updated_at, assigned_by_id, assigned_to_id, deadline, title, description, status, rejection_comment
+		FROM "Backend_task"
+		WHERE assigned_to_id = $1
+	`, employeeID)
+	if err != nil {
+		log.Printf("Error fetching tasks: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching tasks"})
+		return
+	}
+	defer rows.Close()
+
+	// Step 3: Build tasks list
+	tasks := []map[string]interface{}{}
+
+	for rows.Next() {
+		var (
+			id, assignedByID, assignedToID               int
+			createdAt, updatedAt, deadline               string
+			title, description, status, rejectionComment sql.NullString
+		)
+
+		err := rows.Scan(&id, &createdAt, &updatedAt, &assignedByID, &assignedToID, &deadline, &title, &description, &status, &rejectionComment)
+		if err != nil {
+			log.Printf("Error scanning task row: %v", err)
+			continue
+		}
+
+		task := map[string]interface{}{
+			"id":                id,
+			"created_at":        createdAt,
+			"updated_at":        updatedAt,
+			"assigned_by_id":    assignedByID,
+			"assigned_to_id":    assignedToID,
+			"deadline":          deadline,
+			"title":             title.String,
+			"description":       description.String,
+			"status":            status.String,
+			"rejection_comment": rejectionComment.String,
+		}
+
+		tasks = append(tasks, task)
+	}
+
+	c.JSON(http.StatusOK, tasks)
+}
+
+func submitTask(c *gin.Context) {
+	taskID := c.DefaultQuery("task_id", "")
+
+	if taskID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Task ID is required"})
+		return
+	}
+
+}
+
 func main() {
 	r := gin.Default()
 
@@ -266,6 +341,11 @@ func main() {
 	r.GET("/list-columns/:tableName", getColumnNames)
 
 	r.GET("/list-table/:tableName", listTableContents)
+
+	r.GET("/tasks", fetchTasks)
+
+	r.GET("/task_submit", submitTask)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
