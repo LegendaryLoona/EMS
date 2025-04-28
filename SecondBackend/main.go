@@ -306,6 +306,8 @@ func fetchTasks(c *gin.Context) {
 
 		tasks = append(tasks, task)
 	}
+	fmt.Println(tasks)
+	log.Println(tasks)
 
 	c.JSON(http.StatusOK, tasks)
 }
