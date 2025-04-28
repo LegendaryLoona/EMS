@@ -42,7 +42,7 @@ function MobileDashboard({ user }) {
   };
 
   const handleSubmitTask = (taskId) => {
-    axios.post(`${process.env.REACT_APP_API_URL}/task_submit?task_id=${taskId}`, {}, config)
+    axios.post(`${process.env.REACT_APP_MOBILE_API_URL}/task_submit?task_id=${taskId}`, {}, config)
       .then(() => {
         alert('Task submitted!');
         fetchTasks(); // refresh tasks after submission
