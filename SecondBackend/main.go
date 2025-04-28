@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -314,22 +313,15 @@ func fetchTasks(c *gin.Context) {
 }
 
 func submitTask(c *gin.Context) {
-	taskIDStr := c.DefaultQuery("task_id", "")
-	if taskIDStr == "" {
+	taskID := c.DefaultQuery("task_id", "")
+	if taskID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Task ID is required"})
-		return
-	}
-
-	// Convert taskID string to integer
-	taskID, err := strconv.Atoi(taskIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Task ID"})
 		return
 	}
 
 	// Update the task status to 'submitted'
 	query := `
-		UPDATE "Backend_tasks"
+		UPDATE "Backend_task"
 		SET status = 'submitted'
 		WHERE id = $1
 	`
