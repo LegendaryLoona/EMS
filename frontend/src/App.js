@@ -11,14 +11,16 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
+  // Function to detect if the app is being accessed from a mobile device
   function isMobileDevice() {
     return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   }
 
+  // On initial load, check for saved login info and device type
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
     const userData = localStorage.getItem('user');
-    setIsMobile(isMobileDevice()); // detect on app load
+    setIsMobile(isMobileDevice()); // Detect if device is mobile
 
     if (token && userData) {
       const parsedUser = JSON.parse(userData);
@@ -27,20 +29,22 @@ function App() {
       setUser(parsedUser);
     }
 
-    setLoading(false);
+    setLoading(false); // Mark loading complete
   }, []);
 
+  // Handle successful login and persist user info to localStorage
   const handleLogin = (userData) => {
     console.log("Login successful, received data:", userData);
     console.log("User role from login:", userData.user.role);
-    
+
     setUser(userData.user);
     localStorage.setItem('user', JSON.stringify(userData.user));
     localStorage.setItem('accessToken', userData.access);
     localStorage.setItem('refreshToken', userData.refresh);
-    setIsMobile(isMobileDevice()); // detect again on login just in case
+    setIsMobile(isMobileDevice()); // Re-check device type
   };
 
+  // Clear user session on logout
   const handleLogout = () => {
     console.log("Logging out");
     setUser(null);
@@ -49,6 +53,7 @@ function App() {
     localStorage.removeItem('refreshToken');
   };
 
+  // Show loading message while checking for user session
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -68,14 +73,21 @@ function App() {
       </header>
 
       <main>
+        {/* If user is not logged in, show login form */}
         {!user ? (
           <Login onLogin={handleLogin} />
+
+        // Restrict admin/manager access on mobile
         ) : isMobile && (user.role === 'admin' || user.role === 'manager') ? (
           <div style={{ color: 'red', marginTop: '2rem' }}>
             {user.role} access is only available on PC. Please use a computer.
           </div>
+
+        // Show mobile dashboard for employees on mobile
         ) : isMobile && user.role === 'employee' ? (
           <MobileDashboard user={user} />
+
+        // Render appropriate dashboard by user role
         ) : user.role === 'admin' ? (
           <AdminDashboard user={user} />
         ) : user.role === 'manager' ? (

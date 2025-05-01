@@ -6,26 +6,31 @@ function Login({ onLogin }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     
     console.log("Attempting login with:", { username });
-    
+
     try {
+      // Call login API endpoint
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/login/`, {
         username,
         password
       });
-      
+
       console.log("Login API response:", response.data);
-      
+
+      // Ensure response includes expected user role data
       if (!response.data.user || !response.data.user.role) {
         console.error("Missing user role in response:", response.data);
       }
-      
+
+      // Call parent login handler
       onLogin(response.data);
     } catch (err) {
+      // Handle and display login errors
       console.error('Login error:', err.response ? err.response.data : err.message);
       setError('Invalid username or password');
     }

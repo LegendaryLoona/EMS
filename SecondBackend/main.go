@@ -9,11 +9,12 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // PostgreSQL driver
 )
 
 var db *sql.DB
 
+// init initializes the PostgreSQL connection using environment variables.
 func init() {
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		os.Getenv("DB_USER"),
@@ -29,12 +30,13 @@ func init() {
 		log.Fatal(errDb)
 	}
 
-	err := db.Ping()
+	err := db.Ping() // Check if the DB connection is alive
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
+// EmployeeProfile represents the structure of employee data returned in JSON.
 type EmployeeProfile struct {
 	EmployeeID  string  `json:"employee_id"`
 	FirstName   string  `json:"first_name"`
@@ -50,6 +52,7 @@ type EmployeeProfile struct {
 	IsActive    bool    `json:"is_active"`
 }
 
+// getEmployeeProfile handles GET /profile and returns the profile of an employee based on user_id.
 func getEmployeeProfile(c *gin.Context) {
 	userID := c.DefaultQuery("user_id", "")
 
@@ -60,6 +63,7 @@ func getEmployeeProfile(c *gin.Context) {
 
 	var employee EmployeeProfile
 
+	// Query employee data from DB
 	query := `
     SELECT employee_id, first_name, last_name, gender, date_of_birth, address, hire_date, 
            manager_id, position, salary, department_id, is_active
@@ -81,6 +85,7 @@ func getEmployeeProfile(c *gin.Context) {
 		return
 	}
 
+	// If employee has a manager, fetch their full name
 	if employee.Manager != nil {
 		var managerFirstName, managerLastName string
 		managerQuery := `
@@ -98,6 +103,8 @@ func getEmployeeProfile(c *gin.Context) {
 		managerFullName := managerFirstName + " " + managerLastName
 		employee.Manager = &managerFullName
 	}
+
+	// If employee has a department, fetch the department name
 	if employee.Department != nil {
 		var departmentName string
 		departmentQuery := `
@@ -112,12 +119,13 @@ func getEmployeeProfile(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching department data"})
 			return
 		}
-		// Set the manager's name in the employee struct
 		employee.Department = &departmentName
 	}
+
 	c.JSON(http.StatusOK, employee)
 }
 
+// listTables handles GET /db and prints all public table names in the DB to the console.
 func listTables(c *gin.Context) {
 	query := "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
 
@@ -137,6 +145,7 @@ func listTables(c *gin.Context) {
 	}
 }
 
+// getColumnNames handles GET /list-columns/:tableName and returns all column names of a table.
 func getColumnNames(c *gin.Context) {
 	tableName := c.Param("tableName")
 
@@ -172,9 +181,11 @@ func getColumnNames(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"columns": columns})
 }
 
+// listTableContents handles GET /list-table/:tableName and returns all rows of a table.
 func listTableContents(c *gin.Context) {
 	tableName := c.Param("tableName")
 
+	// Get columns for dynamic mapping
 	columns, err := getColumnNamesFromDb(tableName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -219,6 +230,7 @@ func listTableContents(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"rows": results})
 }
 
+// getColumnNamesFromDb is a helper to retrieve column names of a table from DB.
 func getColumnNamesFromDb(tableName string) ([]string, error) {
 	query := `
 		SELECT column_name
@@ -245,6 +257,7 @@ func getColumnNamesFromDb(tableName string) ([]string, error) {
 	return columns, rows.Err()
 }
 
+// fetchTasks handles GET /tasks and returns all tasks assigned to the employee corresponding to user_id.
 func fetchTasks(c *gin.Context) {
 	userID := c.DefaultQuery("user_id", "")
 
@@ -252,6 +265,8 @@ func fetchTasks(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID is required"})
 		return
 	}
+
+	// Get employee ID using user ID
 	var employeeID int
 	err := db.QueryRow(`SELECT id FROM "Backend_employee" WHERE user_id = $1`, userID).Scan(&employeeID)
 	if err != nil {
@@ -263,6 +278,8 @@ func fetchTasks(c *gin.Context) {
 		}
 		return
 	}
+
+	// Get tasks assigned to the employee
 	rows, err := db.Query(`
 		SELECT id, created_at, updated_at, assigned_by_id, assigned_to_id, deadline, title, description, status, rejection_comment
 		FROM "Backend_task"
@@ -275,9 +292,9 @@ func fetchTasks(c *gin.Context) {
 	}
 	defer rows.Close()
 
-	// Step 3: Build tasks list
 	tasks := []map[string]interface{}{}
 
+	// Parse each task row
 	for rows.Next() {
 		var (
 			id, assignedByID, assignedToID               int
@@ -312,6 +329,7 @@ func fetchTasks(c *gin.Context) {
 	c.JSON(http.StatusOK, tasks)
 }
 
+// submitTask handles POST /task_submit and sets the task status to 'submitted'.
 func submitTask(c *gin.Context) {
 	taskID := c.DefaultQuery("task_id", "")
 	if taskID == "" {
@@ -319,7 +337,7 @@ func submitTask(c *gin.Context) {
 		return
 	}
 
-	// Update the task status to 'submitted'
+	// Update task status
 	query := `
 		UPDATE "Backend_task"
 		SET status = 'submitted'
@@ -348,9 +366,11 @@ func submitTask(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Task submitted successfully"})
 }
 
+// main initializes the Gin server and routes
 func main() {
 	r := gin.Default()
 
+	// Enable CORS
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -358,26 +378,23 @@ func main() {
 		AllowCredentials: true,
 	}))
 
+	// Define HTTP routes
 	r.GET("/", func(c *gin.Context) {
 		c.String(200, "Hello from Go + Gin + Render!")
 	})
-
 	r.GET("/profile", getEmployeeProfile)
-
 	r.GET("/db", listTables)
-
 	r.GET("/list-columns/:tableName", getColumnNames)
-
 	r.GET("/list-table/:tableName", listTableContents)
-
 	r.GET("/tasks", fetchTasks)
-
 	r.POST("/task_submit", submitTask)
 
+	// Determine port
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
+	// Start the server
 	r.Run(":" + port)
 }

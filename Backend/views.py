@@ -11,8 +11,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 
-
-
+# Returns the past 30 days of attendance for a specific employee
 class EmployeeMonthlyAttendanceView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -27,9 +26,11 @@ class EmployeeMonthlyAttendanceView(APIView):
 
         attendances = Attendance.objects.filter(employee=employee, date__gte=thirty_days_ago)
 
+        # Create a map to quickly find attendance by date
         attendance_map = {att.date: att for att in attendances}
         result = []
 
+        # Generate attendance summary for each of the last 30 days
         for i in range(30):
             day = today - timedelta(days=i)
             att = attendance_map.get(day)
@@ -40,9 +41,10 @@ class EmployeeMonthlyAttendanceView(APIView):
                 'was_present': bool(att and att.clock_in),
             })
 
-        return Response(result[::-1]) 
+        return Response(result[::-1])  # Reverse for chronological order
 
 
+# Returns the last 30 attendance records for the logged-in employee
 class MyAttendanceView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -53,14 +55,14 @@ class MyAttendanceView(APIView):
         return Response(serializer.data)
 
 
-
+# Handles full CRUD for tasks
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 
-
+# Handles clock in/out attendance submission for a given employee
 class MarkAttendanceView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -87,6 +89,7 @@ class MarkAttendanceView(APIView):
         return Response(AttendanceSerializer(attendance).data)
 
 
+# Returns the profile of the currently logged-in user
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def my_profile(request):
@@ -94,6 +97,8 @@ def my_profile(request):
     serializer = EmployeeSerializer(employee)
     return Response(serializer.data)
 
+
+# Handles login and JWT token creation
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
     
@@ -119,7 +124,7 @@ class LoginView(APIView):
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
-
+# Lists employees in a specific department
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def department_employees(request, department_id):
@@ -137,7 +142,7 @@ def department_employees(request, department_id):
     return Response(data)
 
 
-
+# User CRUD operations with permission filtering
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
@@ -150,6 +155,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
 
+# Simple authenticated check endpoint
 class TestAuthView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     
@@ -162,32 +168,34 @@ class TestAuthView(APIView):
             'role': user_role
         })
 
+
+# Full CRUD for departments with admin-only modification
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
     
     def get_permissions(self):
-
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
             permission_classes = [permissions.IsAdminUser]
         else:
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
     
+
+# Full CRUD for employees with admin-only modification
 class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
     
     def get_permissions(self):
-
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
             permission_classes = [permissions.IsAdminUser]
         else:
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
-    
 
 
+# Endpoint for employees to submit a task for review
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def submit_task(request, task_id):
@@ -203,6 +211,8 @@ def submit_task(request, task_id):
     except Task.DoesNotExist:
         return Response({'error': 'Task not found.'}, status=status.HTTP_404_NOT_FOUND)
 
+
+# Endpoint for manager to review a task (accept or reject)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def review_task(request, task_id):
@@ -228,8 +238,9 @@ def review_task(request, task_id):
 
     except Task.DoesNotExist:
         return Response({'error': 'Task not found.'}, status=status.HTTP_404_NOT_FOUND)
-    
 
+
+# List and create requests from managers
 class RequestListCreateView(generics.ListCreateAPIView):
     serializer_class = RequestSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -240,11 +251,15 @@ class RequestListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(submitted_by=self.request.user.employee_profile)
 
+
+# List all requests for admins
 class RequestAdminListView(generics.ListAPIView):
     queryset = Request.objects.all()
     serializer_class = RequestSerializer
     permission_classes = [permissions.IsAdminUser]
 
+
+# Admin can review a request and mark it completed or declined
 class RequestReviewView(generics.UpdateAPIView):
     queryset = Request.objects.all()
     serializer_class = RequestSerializer
