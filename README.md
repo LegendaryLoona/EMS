@@ -27,46 +27,31 @@ The Employee Management System (EMS) is designed to help organizations efficient
 
 | Actor      | Feature                     | Description                                                                 |
 |------------|-----------------------------|-----------------------------------------------------------------------------|
-| Auth       | Login/Logout                | Allows users to securely log in/out of the system                          |
+| Auth       | Login/Logout                | Allows users to log in/out of the system                                   |
 | Admin      | Manage users                | Allows admin to add new users, edit and delete existing ones               |
 | Admin      | Manage Employees            | Allows admin to add new Employees, edit and delete existing ones           |
 | Admin      | Manage Department           | Allows admin to add new Departments, edit and delete existing ones         |
 | Manager    | Manage Attendance           | Allows Manager to Clock-in/Clock-out Employees                             |
-| Manager    | Manage Tasks                | Allows Manager to Clock-in/Clock-out Employees                             |
+| Manager    | Manage Tasks                | Allows Manager to Assign tasks to Employees, Accept and reject them        |
 | Employees  | View Profiles               | Displays employee details like department, manager, and salary             |
-| Tasks      | Assign & Submit Tasks       | Managers assign tasks, employees can mark them as submitted                |
-| HR Tools   | View by Department          | Filter and search employees based on department and position               |
-| Reports    | Dashboard                   | Presents tabular reports of employee-task relationships                    |
+| Employees  | Submit Tasks                | Allows Employees to submit their tasks to their Manager                    |
+
 
 ### ⚙️ Non-Functional Requirements
 
-- Mobile responsiveness
-- RESTful API support
 - Cross-platform compatibility
-- Secure task update endpoints
-- Continuous delivery and development setup via Docker
+- Data security
+- Easy deployment via Docker
 
 ---
 
-## 🧰 Tech Stack
+## Tech Stack
 
-| Layer          | Technology                  |
+| Layer          | Language/Framework          |
 |----------------|-----------------------------|
-| Frontend       | HTML, JavaScript, Tailwind  |
-| Backend        | Go (Gin Framework)          |
-| API Gateway    | Gin Router                  |
+| Frontend       | HTML, JavaScript, ReactJS   |
+| Main Backend   | Python, Django Framework    |
+| Mobile Backend | Go                          |
 | Database       | PostgreSQL                  |
-| Deployment     | Docker                      |
-| Diagrams       | Draw.io for UML             |
-
----
-
-## 🏗️ Architecture
-
-The application follows a modular microservices approach, consisting of:
-
-- **Frontend Server**: Static HTML/JS served with Tailwind CSS
-- **Backend Server**: Gin-based REST API (Go)
-- **Database Server**: PostgreSQL with multiple relational tables
-- **Gateway Layer**: Acts as entry point for all HTTP requests
+| Deployment     | Docker, Render.com          |
 
