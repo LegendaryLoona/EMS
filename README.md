@@ -1,10 +1,11 @@
 #  Employee Management System (EMS)
 
-This is a submission for an individual project assessment for the Programming Clinic Course for Lancaster University. Student ID: 39583627.
+This is a submission for an individual project assessment for the Programming Clinic Course for Lancaster University. 
+Student ID: 39583627.
 
 This is a distributed web application built for managing employees in an organization.
 
-## 📚 Table of Contents
+##  Table of Contents
 
 - [Overview](#overview)
 - [Features](#features)
