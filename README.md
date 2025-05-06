@@ -1,9 +1,22 @@
 #  Employee Management System (EMS)
 
 This is a submission for an individual project assessment for the Programming Clinic Course for Lancaster University. 
+
 Student ID: 39583627.
 
 This is a distributed web application built for managing employees in an organization.
+
+Below are links to the github repository and to the application deployed on Render.com. 
+
+Github: https://github.com/LegendaryLoona/EMS
+Render.com: https://myfrontend-8zrf.onrender.com (Might take a minute to activate. Application needs to build again after not being used for some time.) 
+
+Below is the list of login info:
+| User       | Username                    | Password                                                                    |
+|------------|-----------------------------|-----------------------------------------------------------------------------|
+| Admin      | admin                       | admin                                                                       |
+| Manager    | Manager                     | Manager                                                                     |
+| Employee   | Employee                    | Employee                                                                    |
 
 ##  Table of Contents
 
@@ -37,7 +50,7 @@ The Employee Management System (EMS) is designed to help organizations efficient
 | Employees  | Submit Tasks                | Allows Employees to submit their tasks to their Manager                    |
 
 
-### ⚙️ Non-Functional Requirements
+### Non-Functional Requirements
 
 - Cross-platform compatibility
 - Data security
