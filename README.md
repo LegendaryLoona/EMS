@@ -58,7 +58,7 @@ PostgreSQL Server is used to store data in a secure and convenient way.
 | Employees  | Submit Tasks                | Allows Employees to submit their tasks to their Manager                    |
 
 
-### Non-Functional Requirements
+### Non-Functional Features
 
 - Cross-platform compatibility
 - Data security
@@ -82,4 +82,10 @@ PostgreSQL Server is used to store data in a secure and convenient way.
 Due to the large number of resources and frameworks used, the deployment of Frontend and Main Backend Server was performed via Docker.
 
 Render.com was used to deploy the application online for free. It hosts all four servers and allows them to communicate with each other. It also allows any user to access the aplication from any device.
+
+For deployment it is recommended to Deploy the application on a clound platform instead of running it on a local machine due to the large amount of used resources and necessary changes.
+
+Application can be set up for free using Render.com as a platform.
+
+The first step is to create a PostgreSQL database instance. This instance will provide us with the internal database URL
 
