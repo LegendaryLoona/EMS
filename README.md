@@ -24,16 +24,23 @@ Below is the list of login info:
 - [Overview](#overview)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
-- [Architecture](#architecture)
-- [Installation](#installation)
-- [API Endpoints](#api-endpoints)
-- [System Requirements](#system-requirements)
+- [Deployment](#deployment)
 
 ---
 
 ##  Overview
 
 The Employee Management System (EMS) is designed to help organizations efficiently manage their employee information, task assignments, and attendance info.
+
+The application consists of 4 separate servers. 
+
+Frontend Server is used to present the user with an easy-to-use interface with which the user can send requests to the backeend servers. It also redirects users from PCs to the main backend and users from mobile devices to the Mobile Backend.
+
+Main Backend server is used for all functions of admin's, manager's and employee's dashboards.
+
+Mobile Backend is used to present the user with a simplified version of an Employee dashboard.
+
+PostgreSQL Server is used to store data in a secure and convenient way.
 
 ##  Features
 
@@ -65,7 +72,14 @@ The Employee Management System (EMS) is designed to help organizations efficient
 |----------------|-----------------------------|
 | Frontend       | HTML, JavaScript, ReactJS   |
 | Main Backend   | Python, Django Framework    |
-| Mobile Backend | Go                          |
+| Mobile Backend | Go, Gin                     |
 | Database       | PostgreSQL                  |
 | Deployment     | Docker, Render.com          |
+
+
+## Deployment
+
+Due to the large number of resources and frameworks used, the deployment of Frontend and Main Backend Server was performed via Docker.
+
+Render.com was used to deploy the application online for free. It hosts all four servers and allows them to communicate with each other. It also allows any user to access the aplication from any device.
 
