@@ -123,7 +123,7 @@ DB_USER = username from postgres
 
 In order to create a frontend, you will need to create a Static Site instance.
 
-The root directory for front end is ./frontend
+The root directory with the docker file for front end is ./frontend
 
 Build command: $ npm install && npm run build
 
