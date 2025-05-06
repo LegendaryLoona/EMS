@@ -14,7 +14,7 @@ import (
 
 var db *sql.DB
 
-// init initializes the PostgreSQL connection using environment variables.
+// Initializes the PostgreSQL connection using environment variables.
 func init() {
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		os.Getenv("DB_USER"),
@@ -52,7 +52,7 @@ type EmployeeProfile struct {
 	IsActive    bool    `json:"is_active"`
 }
 
-// getEmployeeProfile handles GET /profile and returns the profile of an employee based on user_id.
+// Returns the profile of an employee based on user_id.
 func getEmployeeProfile(c *gin.Context) {
 	userID := c.DefaultQuery("user_id", "")
 
@@ -125,7 +125,7 @@ func getEmployeeProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, employee)
 }
 
-// listTables handles GET /db and prints all public table names in the DB to the console.
+// Prints all public table names in the DB to the console.
 func listTables(c *gin.Context) {
 	query := "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
 
@@ -145,7 +145,7 @@ func listTables(c *gin.Context) {
 	}
 }
 
-// getColumnNames handles GET /list-columns/:tableName and returns all column names of a table.
+// Returns all column names of a table.
 func getColumnNames(c *gin.Context) {
 	tableName := c.Param("tableName")
 
@@ -181,7 +181,7 @@ func getColumnNames(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"columns": columns})
 }
 
-// listTableContents handles GET /list-table/:tableName and returns all rows of a table.
+// Rreturns all rows of a table.
 func listTableContents(c *gin.Context) {
 	tableName := c.Param("tableName")
 
@@ -230,7 +230,7 @@ func listTableContents(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"rows": results})
 }
 
-// getColumnNamesFromDb is a helper to retrieve column names of a table from DB.
+// Retrieve column names of a table from DB.
 func getColumnNamesFromDb(tableName string) ([]string, error) {
 	query := `
 		SELECT column_name
@@ -257,7 +257,7 @@ func getColumnNamesFromDb(tableName string) ([]string, error) {
 	return columns, rows.Err()
 }
 
-// fetchTasks handles GET /tasks and returns all tasks assigned to the employee corresponding to user_id.
+// Returns all tasks assigned to the employee corresponding to user_id.
 func fetchTasks(c *gin.Context) {
 	userID := c.DefaultQuery("user_id", "")
 
@@ -329,7 +329,7 @@ func fetchTasks(c *gin.Context) {
 	c.JSON(http.StatusOK, tasks)
 }
 
-// submitTask handles POST /task_submit and sets the task status to 'submitted'.
+// Sets the task status to 'submitted'.
 func submitTask(c *gin.Context) {
 	taskID := c.DefaultQuery("task_id", "")
 	if taskID == "" {
@@ -366,7 +366,7 @@ func submitTask(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Task submitted successfully"})
 }
 
-// main initializes the Gin server and routes
+// Initializes the Gin server and routes
 func main() {
 	r := gin.Default()
 
