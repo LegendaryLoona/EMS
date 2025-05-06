@@ -98,8 +98,11 @@ The second step is to create two web services for the backend services. Docker f
 Main backend requires three environmental variables:
 
 DATABASE_URL = the internal URL of the PostgreSQL database
+
 DEBUG = FALSE
+
 SECRET_KEY = 25bbeb0bc9320b7fd43bb0fbe237acae
+
 
 ### Mobile Backend
 
@@ -114,9 +117,13 @@ Start Command: $ ./app
 Required Environmental Variables:
 
 DB_HOST = db_host from Postgres
+
 DB_NAME = db_name from Postgres
+
 DB_PASSWORD = password from Postgres
+
 DB_PORT = port from postgres
+
 DB_USER = username from postgres
 
 ### Frontend
