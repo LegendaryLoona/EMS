@@ -58,7 +58,7 @@ PostgreSQL Server is used to store data in a secure and convenient way.
 | Employees  | Submit Tasks                | Allows Employees to submit their tasks to their Manager                    |
 
 
-### Non-Functional Requirements
+### Non-Functional Features
 
 - Cross-platform compatibility
 - Data security
@@ -83,3 +83,62 @@ Due to the large number of resources and frameworks used, the deployment of Fron
 
 Render.com was used to deploy the application online for free. It hosts all four servers and allows them to communicate with each other. It also allows any user to access the aplication from any device.
 
+For deployment it is recommended to Deploy the application on a clound platform instead of running it on a local machine due to the large amount of used resources and necessary changes.
+
+Application can be set up for free using Render.com as a platform.
+
+### Database
+
+The first step is to create a PostgreSQL database service. This service will provide us with the internal database URL, hostname, db_name, username, password and port. 
+
+### Main Backend
+
+The second step is to create two web services for the backend services. Docker file for the main backend is located in the root directory of the repository.
+
+Main backend requires three environmental variables:
+
+DATABASE_URL = the internal URL of the PostgreSQL database
+
+DEBUG = FALSE
+
+SECRET_KEY = 25bbeb0bc9320b7fd43bb0fbe237acae
+
+
+### Mobile Backend
+
+Mobile backend should be deployed using Go. Below are the necessary settings.
+
+The root directory is ./SecondBackend
+
+Build Command: $ go build -tags netgo -ldflags '-s -w' -o app
+
+Start Command: $ ./app
+
+Required Environmental Variables:
+
+DB_HOST = db_host from Postgres
+
+DB_NAME = db_name from Postgres
+
+DB_PASSWORD = password from Postgres
+
+DB_PORT = port from postgres
+
+DB_USER = username from postgres
+
+### Frontend
+
+In order to create a frontend, you will need to create a Static Site instance.
+
+The root directory with the docker file for front end is ./frontend
+
+Build command: $ npm install && npm run build
+
+Publish Directory: build
+
+Frontend also requires two environmental variables with Backend links. These links are provided when you create the backend servers.
+
+REACT_APP_API_URL = link to the Main Backend server
+REACT_APP_MOBILE_API_URL = link to the Mobile Backend server
+
+Those are all the parametres needed to fully set up the application. The admin user is created automatically when the main backend server is deployed. The username and password are both admin
