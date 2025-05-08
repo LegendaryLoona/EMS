@@ -177,11 +177,13 @@ function EmployeeManagementTab() {
             Manager:
             <select name="manager" value={formData.manager || ''} onChange={handleChange}>
               <option value="">None</option>
-              {employees.map(emp => (
-                <option key={emp.id} value={emp.id}>
-                  {emp.first_name} {emp.last_name}
-                </option>
-              ))}
+              {employees
+                .filter(emp => emp.position === "Manager")
+                .map(emp => (
+                  <option key={emp.id} value={emp.id}>
+                    {emp.first_name} {emp.last_name}
+                  </option>
+                ))}
             </select>
           </label>
           
