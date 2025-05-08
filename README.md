@@ -149,11 +149,32 @@ Log in with the credentials that were provided in this README.
 
 ### Admin instructions
 
-1. Create a new User
-2. Create a new department
-3. Create an Emloyee/Manager, assign them to a new department and link them with the New User. !Attention! In order to create a manager leave the field "Manager" blank and write "Manager" in the position field
-4. You can edit or delete any of these Objects
+User management allows the admin to create/edit/delete users
+
+Employee info allows the admin to create/edit/delete info about employees
+
+Requests tab has the requests sent by a manager. Admin can complete or reject them.
+
+Departments tab allows the admin to create/edit/delete departments
+
 
 ### Manager instructions
 
-1. In order to clock-in/clock-out an employee, go to the coresponding tab
+My profile tab has the info about the user
+
+My department tab shows the list of department's employees and lets the user clock-in/clock-out employees
+
+Attendance history tab allows the user to view the attendance history of any employee
+
+Tasks tab allows the user to assign new tasks to the employees and to accept/reject submitted tasks
+
+Requests tab allows the user to send a request to an admin. (For example request to create a new employee)
+
+
+### Employee instructions
+
+My profile tab has the info about the user
+
+Attendance tab has the info about the employee's attendance
+
+My tasks tab lets the employee complete the tasks that were assigned to them
