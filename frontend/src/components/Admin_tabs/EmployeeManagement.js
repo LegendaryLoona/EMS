@@ -165,7 +165,20 @@ function EmployeeManagementTab() {
             Hire Date:
             <input type="date" name="hire_date" value={formData.hire_date} onChange={handleChange} placeholder="Hire Date" required />
           </label>
-          <input type="text" name="position" value={formData.position} onChange={handleChange} placeholder="Position" required />
+          <input
+            type="text"
+            name="position"
+            list="position-options"
+            value={formData.position}
+            onChange={handleChange}
+            placeholder="Position"
+            required
+          />
+
+          <datalist id="position-options">
+            <option value="Manager" />
+          </datalist>
+
           <input type="number" name="salary" value={formData.salary} onChange={handleChange} placeholder="Salary" required />
 
           <label>
