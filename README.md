@@ -12,7 +12,7 @@ Github: https://github.com/LegendaryLoona/EMS
 
 Render.com: https://myfrontend-8zrf.onrender.com (Might take a minute to activate. Application needs to build again after not being used for some time.) 
 
-Below is the list of login info:
+Below is the list of login info/credentials:
 | User       | Username                    | Password                                                                    |
 |------------|-----------------------------|-----------------------------------------------------------------------------|
 | Admin      | admin                       | admin                                                                       |
@@ -142,3 +142,18 @@ REACT_APP_API_URL = link to the Main Backend server
 REACT_APP_MOBILE_API_URL = link to the Mobile Backend server
 
 Those are all the parametres needed to fully set up the application. The admin user is created automatically when the main backend server is deployed. The username and password are both admin
+
+## How to use
+
+Log in with the credentials that were provided in this README.
+
+### Admin instructions
+
+1. Create a new User
+2. Create a new department
+3. Create an Emloyee/Manager, assign them to a new department and link them with the New User. !Attention! In order to create a manager leave the field "Manager" blank and write "Manager" in the position field
+4. You can edit or delete any of these Objects
+
+### Manager instructions
+
+1. In order to clock-in/clock-out an employee, go to the coresponding tab
