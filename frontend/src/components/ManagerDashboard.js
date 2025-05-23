@@ -255,45 +255,15 @@ function ManagerDashboard({ user }) {
             <h3>Assign Tasks</h3>
             <form onSubmit={handleAssignTask} style={{ marginBottom: '1.5rem' }}>
               <div className="form-row">
-                <select
-                  required
-                  value={taskForm.assigned_to}
-                  onChange={e => setTaskForm({ ...taskForm, assigned_to: e.target.value })}
-                >
+                <select required value={taskForm.assigned_to} onChange={e => setTaskForm({...taskForm, assigned_to: e.target.value})}>
                   <option value="">Select Employee</option>
-                  {
-                    departmentEmployees
-                      .filter(emp => {
-                        console.log("Checking employee:", emp);
-
-                        // Log manager object
-                        if (!emp.manager) {
-                          console.log("Skipping employee due to missing manager:", emp.first_name, emp.last_name);
-                          return false;
-                        }
-
-                        const empManagerFirst = emp.manager.first_name;
-                        const empManagerLast = emp.manager.last_name;
-
-                        const profileFirst = employeeProfile.first_name;
-                        const profileLast = employeeProfile.last_name;
-
-                        console.log(`Manager Name: ${empManagerFirst} ${empManagerLast}`);
-                        console.log(`Profile Name: ${profileFirst} ${profileLast}`);
-
-                        const match =
-                          empManagerFirst === profileFirst &&
-                          empManagerLast === profileLast;
-
-                        console.log("Match?", match);
-                        return match;
-                      })
-                      .map(emp => (
-                        <option key={emp.id} value={emp.id}>
-                          {emp.first_name} {emp.last_name}
-                        </option>
-                      ))
-                  }
+                  {departmentEmployees.filter(emp => 
+                    emp.position !== 'Manager').map(emp => (
+                    <option key={emp.id} value={emp.id}>
+                      {emp.first_name} {emp.last_name}
+                    </option>
+                  ))
+                }
                 </select>
                 <input type="text" placeholder="Task title" required
                   value={taskForm.title}

@@ -138,7 +138,6 @@ def department_employees(request, department_id):
             'position': emp.position,
             'salary': emp.salary,
             'user_email': emp.user.email,
-            'manager': emp.manager,
         })
     return Response(data)
 
