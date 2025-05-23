@@ -257,9 +257,16 @@ function ManagerDashboard({ user }) {
               <div className="form-row">
                 <select required value={taskForm.assigned_to} onChange={e => setTaskForm({...taskForm, assigned_to: e.target.value})}>
                   <option value="">Select Employee</option>
-                  {departmentEmployees.map(emp => (
-                    <option key={emp.id} value={emp.id}>{emp.first_name} {emp.last_name}</option>
-                  ))}
+                  {departmentEmployees.filter(emp => 
+                    emp.manager &&
+                    emp.manager.first_name === employeeProfile.first_name &&
+                    emp.manager.last_name === employeeProfile.last_name
+                  ).map(emp => (
+                    <option key={emp.id} value={emp.id}>
+                      {emp.first_name} {emp.last_name}
+                    </option>
+                  ))
+                }
                 </select>
                 <input type="text" placeholder="Task title" required
                   value={taskForm.title}
